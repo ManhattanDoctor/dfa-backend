@@ -1,0 +1,10 @@
+FROM node:16
+# Set work directory
+WORKDIR /build
+# Install dependencies and building
+COPY . .
+RUN npm i
+# Change work directory
+WORKDIR /build/src/packages/application/api
+# Install dependencies
+RUN npm i

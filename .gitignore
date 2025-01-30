@@ -1,0 +1,39 @@
+# dependencies
+/node_modules
+
+# IDE
+/.idea
+/.awcache
+/.vscode
+*.code-workspace
+
+# bundle
+dist/**/*
+packages/**/*.d.ts
+packages/**/*.js
+
+# dependencies
+/node_modules
+node_modules/
+
+# misc
+.DS_Store
+lerna-debug.log
+npm-debug.log
+yarn-error.log
+/**/npm-debug.log
+/packages/**/.npmrc
+/packages/**/.npmignore
+/packages/**/LICENSE
+
+# backend
+.werf_secret_key
+
+# env
+src/**/.env
+src/packages/application/api/build/
+
+
+
+
+
