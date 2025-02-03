@@ -9,6 +9,8 @@ import { modulePath, nodeModulePath, nodeModulePathBuild } from '@project/module
 import { InitializeService } from './service';
 import { HlfModule } from '@project/module/hlf';
 import { SocketModule } from '@project/module/socket';
+import { OpenIdModule } from '@project/module/openid';
+import { LoginModule } from '@project/module/login';
 
 @Injectable()
 export class AppModule extends ModeApplication<AppSettings> implements OnApplicationBootstrap {
@@ -28,8 +30,10 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
                 TypeOrmModule.forRoot(this.getOrmConfig(settings)[0]),
                 TransportModule.forRoot({ type: TransportType.LOCAL }),
 
+                LoginModule,
                 SocketModule,
                 HlfModule.forRoot(settings.hlf),
+                OpenIdModule.forRoot({ client: settings.keycloak, administrator: settings.keycloakAdministrator }),
             ],
             controllers: [
 

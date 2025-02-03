@@ -1,4 +1,5 @@
 import { IDatabaseSettings, IWebSettings, EnvSettingsStorage } from '@ts-core/backend';
+import { IKeycloakAdministratorSettings, IKeycloakSettings } from '@ts-core/backend-nestjs-openid';
 import { ILogger, LoggerLevel } from '@ts-core/common';
 
 export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDatabaseSettings {
@@ -73,7 +74,33 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
     public get hlf(): IHlfOptions {
         return { name: this.getValue('HLF_NAME'), endpoint: this.getValue('HLF_ENDPOINT') };
     }
+
+    // --------------------------------------------------------------------------
+    //
+    //  Keycloak
+    //
+    // --------------------------------------------------------------------------
+
+    public get keycloak(): IKeycloakSettings {
+        return {
+            url: this.getValue('KEYCLOAK_URL'),
+            realm: this.getValue('KEYCLOAK_REALM'),
+            clientId: this.getValue('KEYCLOAK_CLIENT_ID'),
+            clientSecret: this.getValue('KEYCLOAK_CLIENT_SECRET'),
+            realmPublicKey: this.getValue('KEYCLOAK_REALM_PUBLIC_KEY'),
+        }
+    }
+
+    public get keycloakAdministrator(): IKeycloakAdministratorSettings {
+        return {
+            url: this.getValue('KEYCLOAK_URL'),
+            realm: this.getValue('KEYCLOAK_REALM'),
+            userName: this.getValue('KEYCLOAK_ADMINISTRATOR_NAME'),
+            userPassword: this.getValue('KEYCLOAK_ADMINISTRATOR_PASSWORD'),
+        }
+    }
 }
+
 
 export interface IHlfOptions {
     name: string;

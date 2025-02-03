@@ -24,6 +24,7 @@
         "@nestjs/typeorm": "^10.0.2",
         "@project/common": "file:./src/externals/common",
         "@project/module": "file:./src/packages/module",
+        "@ts-core/backend-nestjs-openid": "~10.0.4",
         "@ts-core/backend-nestjs": "~10.0.6",
         "@ts-core/socket-server": "~3.0.19",
         "@types/request-ip": "^0.0.41"
