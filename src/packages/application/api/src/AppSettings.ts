@@ -1,6 +1,10 @@
+import { IHlfSettings } from '@project/common/platform/settings';
 import { IDatabaseSettings, IWebSettings, EnvSettingsStorage } from '@ts-core/backend';
-import { IKeycloakAdministratorSettings, IKeycloakSettings } from '@ts-core/backend-nestjs-openid';
-import { ILogger, LoggerLevel } from '@ts-core/common';
+import { IKeycloakAdministratorSettings, IKeycloakSettings } from '@ts-core/openid-common';
+import { AbstractSettingsStorage, ILogger, LoggerLevel, UrlUtil } from '@ts-core/common';
+import * as jwk2pem from 'jwk-to-pem';
+import axios from 'axios';
+import * as _ from 'lodash';
 
 export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDatabaseSettings {
     // --------------------------------------------------------------------------
@@ -10,6 +14,18 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
     // --------------------------------------------------------------------------
 
     public logger?: ILogger;
+
+    // --------------------------------------------------------------------------
+    //
+    //  Public Methods
+    //
+    // --------------------------------------------------------------------------
+
+    public async initialize(): Promise<void> {
+        let { url, realm } = this.keycloak;
+        let { data } = await axios.get(`${UrlUtil.parseUrl(url)}realms/${realm}/protocol/openid-connect/certs`);
+        this.data['KEYCLOAK_REALM_PUBLIC_KEY'] = AbstractSettingsStorage.parsePEM(jwk2pem(_.find(data.keys, { use: 'sig' })));
+    }
 
     // --------------------------------------------------------------------------
     //
@@ -71,8 +87,8 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
     //
     // --------------------------------------------------------------------------
 
-    public get hlf(): IHlfOptions {
-        return { name: this.getValue('HLF_NAME'), endpoint: this.getValue('HLF_ENDPOINT') };
+    public get hlf(): IHlfSettings {
+        return { name: this.getValue('HLF_NAME'), url: UrlUtil.parseUrl(this.getValue('HLF_URL')) };
     }
 
     // --------------------------------------------------------------------------
@@ -87,7 +103,7 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
             realm: this.getValue('KEYCLOAK_REALM'),
             clientId: this.getValue('KEYCLOAK_CLIENT_ID'),
             clientSecret: this.getValue('KEYCLOAK_CLIENT_SECRET'),
-            realmPublicKey: this.getValue('KEYCLOAK_REALM_PUBLIC_KEY'),
+            realmPublicKey: this.getValue('KEYCLOAK_REALM_PUBLIC_KEY')
         }
     }
 
@@ -99,10 +115,4 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
             userPassword: this.getValue('KEYCLOAK_ADMINISTRATOR_PASSWORD'),
         }
     }
-}
-
-
-export interface IHlfOptions {
-    name: string;
-    endpoint: string;
 }

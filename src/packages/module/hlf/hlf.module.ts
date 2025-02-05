@@ -7,6 +7,7 @@ import { DatabaseModule } from '@project/module/database';
 import { INFO_URL, LedgerApiClient } from '@hlf-explorer/common';
 import { LedgerDatabase, LedgerMonitor } from '@hlf-explorer/monitor';
 import { HlfBlockParseHandler } from './transport/handler';
+import { IHlfSettings } from '@project/common/platform/settings';
 
 export class HlfModule {
     // --------------------------------------------------------------------------
@@ -21,7 +22,7 @@ export class HlfModule {
                 provide: HlfApiClient,
                 inject: [Logger, Transport],
                 useFactory: async (logger) => {
-                    let item = new HlfApiClient(logger, settings.endpoint, settings.name);
+                    let item = new HlfApiClient(logger, settings.url, settings.name);
                     item.logCommandFilters.push(item => item.name !== INFO_URL);
                     return item;
                 },
@@ -56,7 +57,4 @@ export class HlfModule {
     }
 }
 
-export interface IHlfModuleSettings {
-    name: string;
-    endpoint: string;
-}
+export interface IHlfModuleSettings extends IHlfSettings { }

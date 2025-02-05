@@ -2,14 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Logger, Transport, LoggerWrapper, TransportCryptoManagerEd25519, MathUtil } from '@ts-core/common';
 import { TransportSocket } from '@ts-core/socket-server';
 import { HlfService } from '@project/module/hlf/service';
-import { OpenIdAdministratorService } from '@project/module/openid/service';
 import { LedgerBlockParseCommand } from '@hlf-explorer/monitor';
 import { CoinEmitCommand, CoinTransferCommand, ICoinTransferDto } from '@hlf-core/coin';
 import * as _ from 'lodash';
-import { CoinAddCommand, ICoinAddDto, TestCommand, UserAddCommand } from '@project/common/hlf/transport';
-import { UserRole } from '@project/common/hlf/user';
-import { Variables } from '@project/common/hlf';
-import { CoinType } from '@project/common/hlf/coin';
+
+import { AppSettings } from '../AppSettings';
+
 
 @Injectable()
 export class InitializeService extends LoggerWrapper {
@@ -31,8 +29,8 @@ export class InitializeService extends LoggerWrapper {
         logger: Logger,
         private transport: Transport,
         private socket: TransportSocket,
-        private openId: OpenIdAdministratorService,
-        private hlf: HlfService
+        private hlf: HlfService,
+        private settings: AppSettings,
     ) {
         super(logger);
     }
@@ -46,14 +44,10 @@ export class InitializeService extends LoggerWrapper {
     public async initialize(): Promise<void> {
         await this.hlf.initialize();
 
-        // this.transport.send(new LedgerBlockParseCommand({ number: 8 }));
 
         let api = this.hlf;
         api.setRoot();
 
-        await this.openId.initialize();
-        let items = await this.openId.call(`admin/realms/dfa/roles`);
-        console.log(items);
         // console.log(await api.sendListen(new UserAddCommand({ cryptoKey: Variables.seed.cryptoKey, roles: [UserRole.COIN_MANAGER] })));
         /*
         console.log(await api.sendListen(new CoinAddCommand({

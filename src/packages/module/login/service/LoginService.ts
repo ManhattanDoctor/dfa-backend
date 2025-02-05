@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { KeycloakToken, OpenIdService } from '@ts-core/backend-nestjs-openid';
+import { IOpenIdToken, KeycloakToken, OpenIdService } from '@ts-core/openid-common';
 import { Logger, LoggerWrapper } from '@ts-core/common';
 import { ILoginDto, ILoginDtoResponse } from '@project/common/platform/api/login';
+import { DatabaseService } from '@project/module/database/service';
+import { UserAccountEntity, UserEntity, UserPreferencesEntity, UserStatisticsEntity } from '@project/module/database/user';
+import { UserAccountType, UserStatus } from '@project/common/platform/user';
 
 @Injectable()
 export class LoginService extends LoggerWrapper {
@@ -12,7 +15,7 @@ export class LoginService extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private openid: OpenIdService) {
+    constructor(logger: Logger, private openid: OpenIdService, private database: DatabaseService) {
         super(logger);
     }
 
@@ -22,8 +25,16 @@ export class LoginService extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    private async checkBefore(token: string): Promise<void> {
-        // let item = await UserEntity.findOneBy({ id: new KeycloakToken(token).getUserInfo().sub });
+    private async addUserIfNeed(token: IOpenIdToken): Promise<void> {
+        let { sub, email } = new KeycloakToken(token.access_token).getUserInfo();
+        if (await UserEntity.existsBy({ id: sub })) {
+            return;
+        }
+        let item = UserEntity.createEntity({ id: sub, login: email, status: UserStatus.ACTIVE });
+        item.account = UserAccountEntity.createEntity(UserAccountType.UNDEFINED);
+        item.statistics = UserStatisticsEntity.createEntity();
+        item.preferences = UserPreferencesEntity.createEntity({ name: email, email: email });
+        await item.save();
     }
 
     // --------------------------------------------------------------------------
@@ -33,9 +44,9 @@ export class LoginService extends LoggerWrapper {
     // --------------------------------------------------------------------------
 
     public async login(params: ILoginDto): Promise<ILoginDtoResponse> {
-        console.log(params);
         let item = await this.openid.getTokenByCode({ code: params.data.codeOrToken, redirectUri: params.data.redirectUri });
-        // await this.checkBefore(item.access_token);
-        return { access: { token: item.access_token, expiresIn: item.expires_in, }, refresh: { token: item.refresh_token, expiresIn: item.refresh_expires_in } };
+
+        await this.addUserIfNeed(item);
+        return item;
     }
 }

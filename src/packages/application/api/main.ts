@@ -20,8 +20,9 @@ import * as _ from 'lodash';
 
 async function bootstrap(): Promise<void> {
     let settings = new AppSettings();
-    let logger = (settings.logger = new DefaultLogger(settings.loggerLevel));
+    await settings.initialize();
 
+    let logger = settings.logger = new DefaultLogger(settings.loggerLevel);
     let application = await NestFactory.create(AppModule.forRoot(settings), { logger });
     application.useLogger(logger);
     application.use(helmet());

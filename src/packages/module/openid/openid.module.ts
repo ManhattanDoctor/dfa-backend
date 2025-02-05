@@ -1,7 +1,10 @@
 import { DynamicModule, Provider } from '@nestjs/common';
 import { Logger } from '@ts-core/common';
-import { IKeycloakAdministratorSettings, IKeycloakSettings, OpenIdModule as OpenIdModuleBase, OpenIdService, OpenIdType } from '@ts-core/backend-nestjs-openid';
-import { OpenIdAdministratorService } from './service';
+import { OpenIdModule as OpenIdModuleBase, OpenIdType } from '@ts-core/backend-nestjs-openid';
+import { IKeycloakSettings, IKeycloakAdministratorSettings } from '@ts-core/openid-common';
+import { DatabaseModule } from '@project/module/database';
+import { OpenIdGuard } from './OpenIdGuard';
+import { OpenIdAdministratorService } from './OpenIdAdministratorService';
 
 export class OpenIdModule {
     // --------------------------------------------------------------------------
@@ -18,11 +21,13 @@ export class OpenIdModule {
                 useFactory: async (logger) => {
                     return new OpenIdAdministratorService(logger, settings.administrator);
                 }
-            }
+            },
+            OpenIdGuard
         ];
         return {
             module: OpenIdModule,
             imports: [
+                DatabaseModule,
                 OpenIdModuleBase.forServer(
                     {
                         type: OpenIdType.KEYCLOAK,
@@ -33,6 +38,7 @@ export class OpenIdModule {
             global: true,
             providers,
             exports: [
+                OpenIdGuard,
                 OpenIdAdministratorService
             ]
         };

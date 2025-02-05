@@ -11,6 +11,10 @@ import { HlfModule } from '@project/module/hlf';
 import { SocketModule } from '@project/module/socket';
 import { OpenIdModule } from '@project/module/openid';
 import { LoginModule } from '@project/module/login';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { THROTTLE_DEFAULT } from '@project/module/guard';
+import { ConfigController } from './controller';
+import { LanguageModule } from '@project/module/language';
 
 @Injectable()
 export class AppModule extends ModeApplication<AppSettings> implements OnApplicationBootstrap {
@@ -21,22 +25,27 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
     // --------------------------------------------------------------------------
 
     public static forRoot(settings: AppSettings): DynamicModule {
+        let path = process.cwd();
+        path = '/Users/renat.gubaev/Work/JS/dfa/backend';
         return {
             module: AppModule,
             imports: [
                 DatabaseModule,
                 CacheModule.forRoot(),
                 LoggerModule.forRoot(settings),
+                LanguageModule.forRoot(`${path}/language`),
                 TypeOrmModule.forRoot(this.getOrmConfig(settings)[0]),
                 TransportModule.forRoot({ type: TransportType.LOCAL }),
+                ThrottlerModule.forRoot([THROTTLE_DEFAULT]),
 
                 LoginModule,
                 SocketModule,
+                
                 HlfModule.forRoot(settings.hlf),
                 OpenIdModule.forRoot({ client: settings.keycloak, administrator: settings.keycloakAdministrator }),
             ],
             controllers: [
-
+                ConfigController
             ],
             providers: [
                 {

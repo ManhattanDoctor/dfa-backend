@@ -1,5 +1,5 @@
-import { IKeycloakAdministratorSettings, IKeycloakSettings } from '@ts-core/backend-nestjs-openid';
-import { TransportHttp, ITransportHttpSettings, ExtendedError } from '@ts-core/common';
+import { IKeycloakAdministratorSettings } from '@ts-core/openid-common';
+import { TransportHttp, ExtendedError } from '@ts-core/common';
 import { ILogger } from '@ts-core/common';
 import * as _ from 'lodash';
 

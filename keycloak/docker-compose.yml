@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  keycloak-postgres:
+    container_name: keycloak-postgres
+    image: postgres:16
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    ports:
+      - 37432:5432
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+
+      KC_LOG_LEVEL: info
+      KC_METRICS_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - 8080:8080
+    depends_on:
+      - keycloak-postgres
+    #volumes:
+    #  - type: bind
+    #    source: ./docker/keycloak/realm/rbac.json
+    #    target: /opt/keycloak/data/import/realm-export.json
+    #    read_only: true
+
+volumes:
+  postgres_data:
