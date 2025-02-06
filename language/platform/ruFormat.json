@@ -1,0 +1,6 @@
+{
+    "format": {
+        "userPlural": "{users,plural, one {# пользователь} few {# пользователя} many{# пользователей} other{}}",
+        "userPluralHidden": "{users,plural, one {пользователь} few {пользователя} many{пользователей} other{}}"
+    }
+}

@@ -5,6 +5,7 @@ import { IKeycloakSettings, IKeycloakAdministratorSettings } from '@ts-core/open
 import { DatabaseModule } from '@project/module/database';
 import { OpenIdGuard } from './OpenIdGuard';
 import { OpenIdAdministratorService } from './OpenIdAdministratorService';
+import { OpenIdGetTokenByRefreshTokenController } from './controller';
 
 export class OpenIdModule {
     // --------------------------------------------------------------------------
@@ -36,6 +37,7 @@ export class OpenIdModule {
                     })
             ],
             global: true,
+            controllers: [OpenIdGetTokenByRefreshTokenController],
             providers,
             exports: [
                 OpenIdGuard,

@@ -3,8 +3,8 @@ services:
   keycloak-postgres:
     container_name: keycloak-postgres
     image: postgres:16
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    #volumes:
+    #  - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
@@ -41,5 +41,5 @@ services:
     #    target: /opt/keycloak/data/import/realm-export.json
     #    read_only: true
 
-volumes:
-  postgres_data:
+#volumes:
+#  postgres_data:

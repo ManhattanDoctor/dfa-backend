@@ -27,7 +27,8 @@
         "@project/module": "file:./src/packages/module",
         "@ts-core/backend-nestjs": "~10.0.6",
         "@ts-core/backend-nestjs-language": "^10.0.2",
-        "@ts-core/backend-nestjs-openid": "~10.1.3",
+        "@ts-core/backend-nestjs-openid": "~10.1.9",
+        "@ts-core/openid-common": "~1.0.7",
         "@ts-core/socket-server": "~3.0.19",
         "@types/request-ip": "^0.0.41",
         "jwk-to-pem": "^2.0.7"

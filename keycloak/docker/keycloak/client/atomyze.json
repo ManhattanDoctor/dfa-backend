@@ -1,0 +1,96 @@
+{
+    "clientId": "atomyze",
+    "name": "",
+    "description": "",
+    "rootUrl": "",
+    "adminUrl": "",
+    "baseUrl": "http://localhost:4200",
+    "surrogateAuthRequired": false,
+    "enabled": true,
+    "alwaysDisplayInConsole": false,
+    "clientAuthenticatorType": "client-secret",
+    "secret": "LE8rza4qA3vFP9JCOzbCwEab1vzm7Ct8",
+    "redirectUris": ["http://localhost:4200/*"],
+    "webOrigins": ["*"],
+    "notBefore": 0,
+    "bearerOnly": false,
+    "consentRequired": false,
+    "standardFlowEnabled": true,
+    "implicitFlowEnabled": false,
+    "directAccessGrantsEnabled": true,
+    "serviceAccountsEnabled": true,
+    "authorizationServicesEnabled": true,
+    "publicClient": false,
+    "frontchannelLogout": true,
+    "protocol": "openid-connect",
+    "attributes": {
+        "client.secret.creation.time": "1681547128",
+        "post.logout.redirect.uris": "+",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "use.jwks.url": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "use.refresh.tokens": "true",
+        "tls-client-certificate-bound-access-tokens": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "client_credentials.use_refresh_token": "false",
+        "acr.loa.map": "{}",
+        "require.pushed.authorization.requests": "false",
+        "display.on.consent.screen": "false",
+        "token.response.type.bearer.lower-case": "false"
+    },
+    "authenticationFlowBindingOverrides": {},
+    "fullScopeAllowed": true,
+    "nodeReRegistrationTimeout": -1,
+    "protocolMappers": [
+        {
+            "name": "Client ID",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usersessionmodel-note-mapper",
+            "consentRequired": false,
+            "config": {
+                "user.session.note": "clientId",
+                "userinfo.token.claim": "true",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "clientId",
+                "jsonType.label": "String"
+            }
+        },
+        {
+            "name": "Client IP Address",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usersessionmodel-note-mapper",
+            "consentRequired": false,
+            "config": {
+                "user.session.note": "clientAddress",
+                "userinfo.token.claim": "true",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "clientAddress",
+                "jsonType.label": "String"
+            }
+        },
+        {
+            "name": "Client Host",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usersessionmodel-note-mapper",
+            "consentRequired": false,
+            "config": {
+                "user.session.note": "clientHost",
+                "userinfo.token.claim": "true",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "clientHost",
+                "jsonType.label": "String"
+            }
+        }
+    ],
+    "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "email"],
+    "optionalClientScopes": ["address", "phone", "offline_access", "microprofile-jwt"],
+    "access": {
+        "view": true,
+        "configure": true,
+        "manage": true
+    }
+}

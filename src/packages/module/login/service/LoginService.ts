@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IOpenIdToken, KeycloakToken, OpenIdService } from '@ts-core/openid-common';
+import { IOpenIdToken, KeycloakUtil, OpenIdService } from '@ts-core/openid-common';
 import { Logger, LoggerWrapper } from '@ts-core/common';
 import { ILoginDto, ILoginDtoResponse } from '@project/common/platform/api/login';
 import { DatabaseService } from '@project/module/database/service';
@@ -15,7 +15,7 @@ export class LoginService extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private openid: OpenIdService, private database: DatabaseService) {
+    constructor(logger: Logger, private openId: OpenIdService, private database: DatabaseService) {
         super(logger);
     }
 
@@ -26,7 +26,7 @@ export class LoginService extends LoggerWrapper {
     // --------------------------------------------------------------------------
 
     private async addUserIfNeed(token: IOpenIdToken): Promise<void> {
-        let { sub, email } = new KeycloakToken(token.access_token).getUserInfo();
+        let { sub, email } = await KeycloakUtil.getUserInfo(token.access_token);
         if (await UserEntity.existsBy({ id: sub })) {
             return;
         }
@@ -44,8 +44,7 @@ export class LoginService extends LoggerWrapper {
     // --------------------------------------------------------------------------
 
     public async login(params: ILoginDto): Promise<ILoginDtoResponse> {
-        let item = await this.openid.getTokenByCode({ code: params.data.codeOrToken, redirectUri: params.data.redirectUri });
-
+        let item = await this.openId.getTokenByCode({ code: params.data.codeOrToken, redirectUri: params.data.redirectUri });
         await this.addUserIfNeed(item);
         return item;
     }

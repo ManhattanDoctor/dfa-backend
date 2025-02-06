@@ -42,7 +42,7 @@ export class InitializeService extends LoggerWrapper {
     // --------------------------------------------------------------------------
 
     public async initialize(): Promise<void> {
-        await this.hlf.initialize();
+        // await this.hlf.initialize();
 
 
         let api = this.hlf;

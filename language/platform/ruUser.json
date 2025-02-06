@@ -1,0 +1,47 @@
+{
+    "user": {
+        "id": "#",
+        "login": "Логин",
+        "user": "Пользователь",
+        "users": "Пользователи",
+        "createdDate": "Регистрация",
+        "statistics": {},
+        "preferences": {
+            "preferences": "Настройки",
+            "uid": "Уникальный код",
+            "name": "Имя",
+            "email": "Email",
+
+            "location": "⇛geo.location",
+            "birthday": "Дата рождения",
+            "description": "О себе",
+            "theme": {
+                "theme": "Тема",
+                "DARK": "Темная",
+                "LIGHT": "Светлая"
+            },
+            "locale": {
+                "locale": "Язык",
+                "ru": "Русский",
+                "en": "English"
+            },
+            "isMale": {
+                "isMale": "Пол",
+                "true": "Мужчина",
+                "false": "Женщина"
+            }
+        },
+        "account": {
+            "account": "Аккаунт",
+            "FREE": "Обычный",
+            "ADMINISTRATOR": "Администратор"
+        },
+        "open": {
+            "confirmation": "Вы уверены что хотите перейти по ссылке \"{url}\"?"
+        },
+        "pictureUpdate": {
+            "pictureUpdate": "Загрузить аватар",
+            "confirmation": "Вы хотите загрузить актуальный аватар из вашего аккаунта?"
+        }
+    }
+}

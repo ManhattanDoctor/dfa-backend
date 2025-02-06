@@ -1,7 +1,7 @@
 
 import { User, UserStatus } from '@project/common/platform/user';
 import { TypeormValidableEntity } from '@ts-core/backend';
-import { TransformUtil, ObjectUtil } from '@ts-core/common';
+import { TransformUtil, ObjectUtil, IUIDable } from '@ts-core/common';
 import { IOpenIdUser } from '@ts-core/openid-common';
 import { Expose, ClassTransformOptions } from 'class-transformer';
 import { ValidateNested, IsEnum, IsNumber, IsString } from 'class-validator';
@@ -13,7 +13,7 @@ import { TransformGroup } from '@project/module/core';
 import * as _ from 'lodash';
 
 @Entity({ name: 'user' })
-export class UserEntity extends TypeormValidableEntity implements User, IOpenIdUser {
+export class UserEntity extends TypeormValidableEntity implements User, IUIDable, IOpenIdUser {
 
     // --------------------------------------------------------------------------
     //
@@ -80,6 +80,10 @@ export class UserEntity extends TypeormValidableEntity implements User, IOpenIdU
     // --------------------------------------------------------------------------
 
     public get sub(): string {
+        return this.id;
+    }
+
+    public get uid(): string {
         return this.id;
     }
 

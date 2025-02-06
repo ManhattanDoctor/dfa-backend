@@ -1,14 +1,14 @@
 import { OpenIdGuard as OpenIdGuardBase, IOpenIdBearer as IOpenIdBearerBase } from '@ts-core/backend-nestjs-openid';
 import { OpenIdService } from '@ts-core/openid-common';
-import { Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { DatabaseService } from '@project/module/database/service';
 import { UserNotFoundError } from '@project/common/platform';
-import { User } from '@project/common/platform/user';
+import { UserEntity } from '@project/module/database/user';
 import * as _ from 'lodash';
 
 @Injectable()
-export class OpenIdGuard extends OpenIdGuardBase<User> {
+export class OpenIdGuard extends OpenIdGuardBase<UserEntity> {
 
     // --------------------------------------------------------------------------
     //
@@ -26,14 +26,14 @@ export class OpenIdGuard extends OpenIdGuardBase<User> {
     //
     // --------------------------------------------------------------------------
 
-    protected async getUserInfo(token: string): Promise<User> {
-        let { sub } = await super.getUserInfo(token);
+    protected async getUserInfo(context: ExecutionContext, token: string): Promise<UserEntity> {
+        let { sub } = await super.getUserInfo(context, token);
         let item = await this.database.userGet(sub, true);
         if (_.isNil(item)) {
             throw new UserNotFoundError(item);
         }
-        return item.toObject();
+        return item;
     }
 }
 
-export interface IOpenIdBearer extends IOpenIdBearerBase<User> { }
+export interface IOpenIdBearer extends IOpenIdBearerBase<UserEntity> { }
