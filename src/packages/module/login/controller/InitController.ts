@@ -3,12 +3,13 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IInitDtoResponse } from '@project/common/platform/api/login';
 import { User } from '@project/common/platform/user';
 import { DefaultController } from '@ts-core/backend';
-import { OpenIdBearer } from '@ts-core/backend-nestjs-openid';
+import { OpenIdBearer, OpenIdOfflineValidation } from '@ts-core/backend-nestjs-openid';
 import { Logger } from '@ts-core/common';
 import { IsNotEmpty } from 'class-validator';
 import { INIT_URL } from '@project/common/platform/api';
 import { OpenIdGuard, IOpenIdBearer } from '@project/module/openid';
 import { TRANSFORM_PRIVATE } from '@project/module/core';
+import { Company } from '@project/common/platform/company';
 import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
@@ -21,6 +22,9 @@ export class InitDtoResponse implements IInitDtoResponse {
     @ApiProperty()
     @IsNotEmpty()
     public user: User;
+
+    @ApiProperty()
+    public company: Company;
 }
 
 // --------------------------------------------------------------------------
@@ -48,9 +52,9 @@ export class InitController extends DefaultController<void, IInitDtoResponse> {
     // --------------------------------------------------------------------------
 
     @Get()
-    // @OpenIdOfflineValidation()
+    @OpenIdOfflineValidation()
     @UseGuards(OpenIdGuard)
     public async executeExtended(@OpenIdBearer() bearer: IOpenIdBearer): Promise<IInitDtoResponse> {
-        return { user: bearer.user.toObject({ groups: TRANSFORM_PRIVATE }) };
+        return { user: bearer.user.toObject({ groups: TRANSFORM_PRIVATE }), company: bearer.user.company?.toObject({ groups: TRANSFORM_PRIVATE }) };
     }
 }

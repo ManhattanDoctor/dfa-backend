@@ -30,7 +30,7 @@ export class OpenIdGuard extends OpenIdGuardBase<UserEntity> {
         let { sub } = await super.getUserInfo(context, token);
         let item = await this.database.userGet(sub, true);
         if (_.isNil(item)) {
-            throw new UserNotFoundError(item);
+            throw new UserNotFoundError();
         }
         return item;
     }

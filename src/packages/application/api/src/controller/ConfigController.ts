@@ -6,7 +6,7 @@ import { CONFIG_URL } from '@project/common/platform/api';
 import { IConfigDtoResponse } from '@project/common/platform/api/config';
 import { AppSettings } from '../AppSettings';
 import { Swagger } from '@project/module/swagger';
-import { THROTTLE_FAST } from '@project/module/guard';
+import { THROTTLE_FAST } from '@project/module/core';
 import { Throttle } from '@nestjs/throttler';
 import * as _ from 'lodash';
 
@@ -52,8 +52,8 @@ export class ConfigController extends DefaultController<void, IConfigDtoResponse
     // --------------------------------------------------------------------------
 
     @Swagger({ name: 'Get config', response: null })
-    @Get()
     @Throttle({ default: THROTTLE_FAST })
+    @Get()
     public async execute(): Promise<IConfigDtoResponse> {
         return this.cache.wrap<IConfigDtoResponse>(this.getCacheName(), () => this.getItem(), 10 * DateUtil.MILLISECONDS_YEAR);
     }

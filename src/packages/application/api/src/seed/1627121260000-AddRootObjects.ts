@@ -1,4 +1,8 @@
+import { TransformUtil } from '@ts-core/common';
 import { MigrationInterface, QueryRunner } from 'typeorm';
+import { CompanyEntity, CompanyPreferencesEntity } from '@project/module/database/company';
+import { Variables } from '@project/common/hlf';
+import { CompanyPreferences, CompanyStatus, CompanyTaxDetails } from '@project/common/platform/company';
 import * as _ from 'lodash';
 
 export class AddRootObjects1627121260000 implements MigrationInterface {
@@ -9,33 +13,15 @@ export class AddRootObjects1627121260000 implements MigrationInterface {
     //
     // --------------------------------------------------------------------------
 
-    private async userAdd(runner: QueryRunner): Promise<void> {
-        /*
-        let repository = runner.connection.getRepository(UserEntity);
-
-        let platform = new UserEntity();
-        platform.uid = User.createUid(AclVariables.platform.address);
-        platform.status = UserStatus.ACTIVE;
-        platform.address = AclVariables.platform.address;
-        platform.inviterUid = AclVariables.platform.uid;
-        platform.nicknameUid = AclVariables.platform.nicknameUid;
-        await repository.save(platform);
-
-        let team = new UserEntity();
-        team.uid = User.createUid(AclVariables.team.address);
-        team.status = UserStatus.ACTIVE;
-        team.address = AclVariables.team.address;
-        team.inviterUid = AclVariables.platform.uid;
-        await repository.save(team);
-
-        let root = new UserEntity();
-        root.uid = User.createUid(AclVariables.root.address);
-        root.roles = Object.values(UserRole);
-        root.status = UserStatus.ACTIVE;
-        root.address = AclVariables.root.address;
-        root.inviterUid = AclVariables.platform.uid;
-        await repository.save(root);
-        */
+    private async companyAdd(runner: QueryRunner): Promise<void> {
+        let repository = runner.connection.getRepository(CompanyEntity);
+        if (await repository.existsBy({ hlfUid: Variables.seed.user.uid })) {
+            return;
+        }
+        let item = CompanyEntity.createEntity({ hlfUid: Variables.seed.user.uid, status: CompanyStatus.ACTIVE });
+        item.details = TransformUtil.toClass(CompanyTaxDetails, { inn: '000000000000', founded: new Date(0) })
+        item.preferences = CompanyPreferencesEntity.createEntity({ name: 'PLATFORM COMPANY' });
+        await item.save();
     }
 
     private async coinAdd(runner: QueryRunner): Promise<void> {
@@ -63,14 +49,8 @@ export class AddRootObjects1627121260000 implements MigrationInterface {
     // --------------------------------------------------------------------------
 
     public async up(runner: QueryRunner): Promise<any> {
-        /*
-        let repository = runner.connection.getRepository(UserEntity);
-        if (await repository.count() > 0) {
-            return;
-        }
-        await this.userAdd(runner);
+        await this.companyAdd(runner);
         await this.coinAdd(runner);
-        */
     }
 
     public async down(runner: QueryRunner): Promise<any> { }

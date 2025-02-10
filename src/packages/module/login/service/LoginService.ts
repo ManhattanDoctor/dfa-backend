@@ -3,8 +3,9 @@ import { IOpenIdToken, KeycloakUtil, OpenIdService } from '@ts-core/openid-commo
 import { Logger, LoggerWrapper } from '@ts-core/common';
 import { ILoginDto, ILoginDtoResponse } from '@project/common/platform/api/login';
 import { DatabaseService } from '@project/module/database/service';
-import { UserAccountEntity, UserEntity, UserPreferencesEntity, UserStatisticsEntity } from '@project/module/database/user';
-import { UserAccountType, UserStatus } from '@project/common/platform/user';
+import { UserEntity, UserPreferencesEntity } from '@project/module/database/user';
+import { UserStatus } from '@project/common/platform/user';
+import { ImageUtil } from '@project/module/util';
 
 @Injectable()
 export class LoginService extends LoggerWrapper {
@@ -25,15 +26,13 @@ export class LoginService extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    private async addUserIfNeed(token: IOpenIdToken): Promise<void> {
-        let { sub, email } = await KeycloakUtil.getUserInfo(token.access_token);
+    private async addUserIfNeed(token: string): Promise<void> {
+        let { sub, email } = await KeycloakUtil.getUserInfo(token);
         if (await UserEntity.existsBy({ id: sub })) {
             return;
         }
         let item = UserEntity.createEntity({ id: sub, login: email, status: UserStatus.ACTIVE });
-        item.account = UserAccountEntity.createEntity(UserAccountType.UNDEFINED);
-        item.statistics = UserStatisticsEntity.createEntity();
-        item.preferences = UserPreferencesEntity.createEntity({ name: email, email: email });
+        item.preferences = UserPreferencesEntity.createEntity({ name: email, email: email, picture: ImageUtil.getAvatar(sub) });
         await item.save();
     }
 
@@ -45,7 +44,7 @@ export class LoginService extends LoggerWrapper {
 
     public async login(params: ILoginDto): Promise<ILoginDtoResponse> {
         let item = await this.openId.getTokenByCode({ code: params.data.codeOrToken, redirectUri: params.data.redirectUri });
-        await this.addUserIfNeed(item);
+        await this.addUserIfNeed(item.access_token);
         return item;
     }
 }

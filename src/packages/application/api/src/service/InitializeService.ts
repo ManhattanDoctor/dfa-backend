@@ -7,6 +7,7 @@ import { CoinEmitCommand, CoinTransferCommand, ICoinTransferDto } from '@hlf-cor
 import * as _ from 'lodash';
 
 import { AppSettings } from '../AppSettings';
+import { GenesisService } from '@project/module/genesis';
 
 
 @Injectable()
@@ -31,6 +32,7 @@ export class InitializeService extends LoggerWrapper {
         private socket: TransportSocket,
         private hlf: HlfService,
         private settings: AppSettings,
+        private genesis: GenesisService,
     ) {
         super(logger);
     }
@@ -43,7 +45,7 @@ export class InitializeService extends LoggerWrapper {
 
     public async initialize(): Promise<void> {
         // await this.hlf.initialize();
-
+        await this.genesis.initialize(this.settings.keycloakGenesisLogin);
 
         let api = this.hlf;
         api.setRoot();

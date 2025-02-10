@@ -14,7 +14,7 @@ import { IsEmail, Length, IsEnum, MaxLength, IsNumber, IsOptional, IsString } fr
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from './UserEntity';
 import { UserPreferencesLanguage } from '@project/common/platform/user';
-import { TransformGroup } from '@project/module/core';
+import { TRANSFORM_PRIVATE, TransformGroup } from '@project/module/core';
 import * as _ from 'lodash';
 
 @Entity({ name: 'user_preferences' })
@@ -48,20 +48,20 @@ export class UserPreferencesEntity extends TypeormValidableEntity implements Use
     @Length(USER_PREFERENCES_NAME_MIN_LENGTH, USER_PREFERENCES_NAME_MAX_LENGTH)
     public name?: string;
 
-    @Expose({ groups: [TransformGroup.PRIVATE] })
+    @Expose({ groups: TRANSFORM_PRIVATE })
     @Column({ type: 'varchar' })
     @IsOptional()
     @IsEnum(UserPreferencesTheme)
     public theme?: UserPreferencesTheme;
 
-    @Expose({ groups: [TransformGroup.PRIVATE] })
+    @Expose({ groups: TRANSFORM_PRIVATE })
     @Column()
     @IsOptional()
     @IsEmail()
     @MaxLength(USER_PREFERENCES_EMAIL_MAX_LENGTH)
     public email?: string;
 
-    @Expose({ groups: [TransformGroup.PRIVATE] })
+    @Expose({ groups: TRANSFORM_PRIVATE })
     @Column()
     @IsOptional()
     @MaxLength(USER_PREFERENCES_PHONE_MAX_LENGTH)
@@ -72,14 +72,14 @@ export class UserPreferencesEntity extends TypeormValidableEntity implements Use
     @MaxLength(USER_PREFERENCES_PICTURE_MAX_LENGTH)
     public picture?: string;
 
-    @Expose({ groups: [TransformGroup.PRIVATE] })
+    @Expose({ groups: TRANSFORM_PRIVATE })
     @Column({ type: 'varchar' })
     @IsOptional()
     @IsEnum(UserPreferencesLanguage)
     public language?: UserPreferencesLanguage;
 
     @Exclude()
-    @OneToOne(() => UserEntity, user => user.preferences)
+    @OneToOne(() => UserEntity, user => user.preferences, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     public user: UserEntity;
 }

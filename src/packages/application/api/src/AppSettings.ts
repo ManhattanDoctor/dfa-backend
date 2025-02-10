@@ -97,6 +97,10 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
     //
     // --------------------------------------------------------------------------
 
+    public get keycloakGenesisLogin(): string {
+        return this.getValue('KEYCLOAK_GENESIS_LOGIN')
+    }
+
     public get keycloak(): IKeycloakSettings {
         return {
             url: this.getValue('KEYCLOAK_URL'),

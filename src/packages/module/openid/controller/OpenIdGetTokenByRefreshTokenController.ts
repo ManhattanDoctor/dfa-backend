@@ -1,15 +1,13 @@
 
-import { Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Param, Post } from '@nestjs/common';
 import { OPEN_ID_GET_TOKEN_BY_REFRESH_TOKEN_URL } from '@project/common/platform/api';
-import { IOpenIdToken, KeycloakUtil, OpenIdService, OpenIdTokenUndefinedError } from '@ts-core/openid-common';
+import { IOpenIdToken, KeycloakUtil, OpenIdService } from '@ts-core/openid-common';
 import { Throttle } from '@nestjs/throttler';
-import { THROTTLE_SLOW } from '@project/module/guard';
-import { OpenIdBearer, OpenIdGuard, OpenIdSkipValidation } from '@ts-core/backend-nestjs-openid';
-import { IOpenIdBearer } from '../OpenIdGuard';
-import * as _ from 'lodash';
+import { THROTTLE_SLOW } from '@project/module/core';
 import { DatabaseService } from '@project/module/database/service';
 import { UserStatus } from '@project/common/platform/user';
 import { UserStatusForbiddenError } from '@project/common/hlf';
+import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
 //

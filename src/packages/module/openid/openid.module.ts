@@ -1,11 +1,8 @@
 import { DynamicModule, Provider } from '@nestjs/common';
-import { Logger } from '@ts-core/common';
 import { OpenIdModule as OpenIdModuleBase, OpenIdType } from '@ts-core/backend-nestjs-openid';
-import { IKeycloakSettings, IKeycloakAdministratorSettings } from '@ts-core/openid-common';
-import { DatabaseModule } from '@project/module/database';
+import { IKeycloakSettings } from '@ts-core/openid-common';
+import { OpenIdGetTokenByRefreshTokenController, OpenIdLogoutByRefreshTokenController } from './controller';
 import { OpenIdGuard } from './OpenIdGuard';
-import { OpenIdAdministratorService } from './OpenIdAdministratorService';
-import { OpenIdGetTokenByRefreshTokenController } from './controller';
 
 export class OpenIdModule {
     // --------------------------------------------------------------------------
@@ -14,40 +11,17 @@ export class OpenIdModule {
     //
     // --------------------------------------------------------------------------
 
-    public static forRoot(settings: IOpenIdModuleSettings): DynamicModule {
-        let providers: Array<Provider> = [
-            {
-                provide: OpenIdAdministratorService,
-                inject: [Logger],
-                useFactory: async (logger) => {
-                    return new OpenIdAdministratorService(logger, settings.administrator);
-                }
-            },
-            OpenIdGuard
-        ];
+    public static forRoot(settings: IKeycloakSettings): DynamicModule {
+        let providers: Array<Provider> = [OpenIdGuard];
         return {
             module: OpenIdModule,
             imports: [
-                DatabaseModule,
-                OpenIdModuleBase.forServer(
-                    {
-                        type: OpenIdType.KEYCLOAK,
-                        settings: settings.client,
-                        isNeedControllers: true
-                    })
+                OpenIdModuleBase.forServer({ type: OpenIdType.KEYCLOAK, isNeedControllers: true, settings })
             ],
             global: true,
-            controllers: [OpenIdGetTokenByRefreshTokenController],
-            providers,
-            exports: [
-                OpenIdGuard,
-                OpenIdAdministratorService
-            ]
+            controllers: [OpenIdLogoutByRefreshTokenController, OpenIdGetTokenByRefreshTokenController],
+            exports: providers,
+            providers
         };
     }
-}
-
-export interface IOpenIdModuleSettings {
-    client: IKeycloakSettings;
-    administrator: IKeycloakAdministratorSettings;
 }

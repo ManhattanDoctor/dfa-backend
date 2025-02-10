@@ -12,9 +12,12 @@ import { SocketModule } from '@project/module/socket';
 import { OpenIdModule } from '@project/module/openid';
 import { LoginModule } from '@project/module/login';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { THROTTLE_DEFAULT } from '@project/module/guard';
-import { ConfigController } from './controller';
+import { THROTTLE_DEFAULT } from '@project/module/core';
+import { ConfigController, CustodyKeyGetController, CustodyKeySignController } from './controller';
 import { LanguageModule } from '@project/module/language';
+import { TaxModule } from '@project/module/tax';
+import { CustodyModule } from '@project/module/custody';
+import { GenesisModule } from '@project/module/genesis';
 
 @Injectable()
 export class AppModule extends ModeApplication<AppSettings> implements OnApplicationBootstrap {
@@ -38,14 +41,19 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
                 TransportModule.forRoot({ type: TransportType.LOCAL }),
                 ThrottlerModule.forRoot([THROTTLE_DEFAULT]),
 
+                TaxModule,
                 LoginModule,
                 SocketModule,
-                
+                CustodyModule,
+
                 HlfModule.forRoot(settings.hlf),
-                OpenIdModule.forRoot({ client: settings.keycloak, administrator: settings.keycloakAdministrator }),
+                OpenIdModule.forRoot(settings.keycloak),
+                GenesisModule.forRoot(settings.keycloakAdministrator),
             ],
             controllers: [
-                ConfigController
+                ConfigController,
+                CustodyKeyGetController,
+                CustodyKeySignController
             ],
             providers: [
                 {
@@ -78,12 +86,16 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
                 entities: [
                     `${modulePath()}/database/**/*Entity.{ts,js}`,
                     `${nodeModulePath()}/@hlf-explorer/monitor/cjs/**/*Entity.{ts,js}`,
-                    `${nodeModulePathBuild()}/@hlf-explorer/monitor/cjs/**/*Entity.{ts,js}`
+                    `${nodeModulePathBuild()}/@hlf-explorer/monitor/cjs/**/*Entity.{ts,js}`,
+                    //
+                    `${modulePath()}/custody/**/*Entity.{ts,js}`,
                 ],
                 migrations: [
                     __dirname + '/migration/*.{ts,js}',
                     `${nodeModulePath()}/@hlf-explorer/monitor/cjs/**/*Migration.{ts,js}`,
-                    `${nodeModulePathBuild()}/@hlf-explorer/monitor/cjs/**/*Migration.{ts,js}`
+                    `${nodeModulePathBuild()}/@hlf-explorer/monitor/cjs/**/*Migration.{ts,js}`,
+                    //
+                    `${modulePath()}/custody/migration/*.{ts,js}`,
                 ],
                 migrationsRun: true
             },
