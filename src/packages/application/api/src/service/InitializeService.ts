@@ -3,12 +3,8 @@ import { Logger, Transport, LoggerWrapper, TransportCryptoManagerEd25519, MathUt
 import { TransportSocket } from '@ts-core/socket-server';
 import { HlfService } from '@project/module/hlf/service';
 import { LedgerBlockParseCommand } from '@hlf-explorer/monitor';
-import { CoinEmitCommand, CoinTransferCommand, ICoinTransferDto } from '@hlf-core/coin';
 import * as _ from 'lodash';
-
 import { AppSettings } from '../AppSettings';
-import { GenesisService } from '@project/module/genesis';
-
 
 @Injectable()
 export class InitializeService extends LoggerWrapper {
@@ -31,8 +27,7 @@ export class InitializeService extends LoggerWrapper {
         private transport: Transport,
         private socket: TransportSocket,
         private hlf: HlfService,
-        private settings: AppSettings,
-        private genesis: GenesisService,
+        private settings: AppSettings
     ) {
         super(logger);
     }
@@ -44,11 +39,7 @@ export class InitializeService extends LoggerWrapper {
     // --------------------------------------------------------------------------
 
     public async initialize(): Promise<void> {
-        // await this.hlf.initialize();
-        await this.genesis.initialize(this.settings.keycloakGenesisLogin);
-
-        let api = this.hlf;
-        api.setRoot();
+        await this.hlf.initialize();
 
         // console.log(await api.sendListen(new UserAddCommand({ cryptoKey: Variables.seed.cryptoKey, roles: [UserRole.COIN_MANAGER] })));
         /*

@@ -32,8 +32,13 @@ export class OpenIdGuard extends OpenIdGuardBase<UserEntity> {
         if (_.isNil(item)) {
             throw new UserNotFoundError();
         }
+        item.id = item.id;
+        item.companyId = item.companyId;
         return item;
     }
 }
 
-export interface IOpenIdBearer extends IOpenIdBearerBase<UserEntity> { }
+export interface IOpenIdBearer extends IOpenIdBearerBase<UserEntity> {
+    id: string;
+    companyId: number;
+}

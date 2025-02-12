@@ -40,8 +40,4 @@ export class HlfService extends LoggerWrapper {
     public sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: ITransportCommandOptions, ledgerName?: string): Promise<V> {
         return this.api.ledgerRequestSendListen(command, options, ledgerName);
     }
-
-    public setRoot(): void {
-        this.api.setRoot();
-    }
 }

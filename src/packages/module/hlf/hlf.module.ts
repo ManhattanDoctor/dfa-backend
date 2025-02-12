@@ -21,8 +21,8 @@ export class HlfModule {
             {
                 provide: HlfApiClient,
                 inject: [Logger, Transport],
-                useFactory: async (logger) => {
-                    let item = new HlfApiClient(logger, settings.url, settings.name);
+                useFactory: async (logger, transport) => {
+                    let item = new HlfApiClient(logger, transport, settings);
                     item.logCommandFilters.push(item => item.name !== INFO_URL);
                     return item;
                 },

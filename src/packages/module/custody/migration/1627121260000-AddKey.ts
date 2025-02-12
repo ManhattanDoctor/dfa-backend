@@ -16,7 +16,7 @@ export class AddKey1627121260000 implements MigrationInterface {
                 "uid" varchar,
                 "owner" varchar,
                 "algorithm" varchar,
-                "public_key" varchar,
+                "value" varchar,
                 "private_key" varchar,
 
                 "created" timestamp default now() not null

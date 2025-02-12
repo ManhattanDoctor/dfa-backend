@@ -4,7 +4,7 @@ import { KeySignHandler, KeyAddHandler, KeyGetByOwnerHandler } from './transport
 import { KeyService } from './service';
 
 @Module({
-    controllers: [KeyGetController, KeyAddController, KeyListController],
+    //controllers: [KeyGetController, KeyAddController, KeyListController],
     providers: [KeySignHandler, KeyAddHandler, KeyGetByOwnerHandler, KeyService]
 })
 export class CustodyModule { }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IOpenIdToken, KeycloakUtil, OpenIdService } from '@ts-core/openid-common';
+import { KeycloakUtil, OpenIdService } from '@ts-core/openid-common';
 import { Logger, LoggerWrapper } from '@ts-core/common';
 import { ILoginDto, ILoginDtoResponse } from '@project/common/platform/api/login';
 import { DatabaseService } from '@project/module/database/service';
@@ -27,12 +27,12 @@ export class LoginService extends LoggerWrapper {
     // --------------------------------------------------------------------------
 
     private async addUserIfNeed(token: string): Promise<void> {
-        let { sub, email } = await KeycloakUtil.getUserInfo(token);
+        let { sub, email, name } = await KeycloakUtil.getUserInfo(token);
         if (await UserEntity.existsBy({ id: sub })) {
             return;
         }
         let item = UserEntity.createEntity({ id: sub, login: email, status: UserStatus.ACTIVE });
-        item.preferences = UserPreferencesEntity.createEntity({ name: email, email: email, picture: ImageUtil.getAvatar(sub) });
+        item.preferences = UserPreferencesEntity.createEntity({ name: name, email: email, picture: ImageUtil.getAvatar(sub) });
         await item.save();
     }
 

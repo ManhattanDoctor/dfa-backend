@@ -8,10 +8,9 @@
         "start:dev": "ts-node-dev --preserve-symlinks --transpile-only --ignore-watch node_modules main.ts",
         "build": "tsc",
         "typeorm": "ts-node ../../../../node_modules/typeorm/cli",
-        "migration:run": "npm run typeorm migration:run -- -d ormconfig.migration.ts",
-        "schema:drop": "npm run typeorm schema:drop -- -d ormconfig.migration.ts",
-        "seed:run": "npm run typeorm migration:run -- -d ormconfig.seed.ts",
-        "reset": "npm run schema:drop && npm run migration:run && npm run seed:run && npm run start"
+        "migration": "npm run typeorm migration:run -- -d ormconfig.migration.ts",
+        "drop": "npm run typeorm schema:drop -- -d ormconfig.migration.ts",
+        "reset": "npm run schema && npm run migration"
     },
     "dependencies": {
         "cache-manager-memory-store": "^1.1.0",

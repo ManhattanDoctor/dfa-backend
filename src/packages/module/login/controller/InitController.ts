@@ -8,8 +8,8 @@ import { Logger } from '@ts-core/common';
 import { IsNotEmpty } from 'class-validator';
 import { INIT_URL } from '@project/common/platform/api';
 import { OpenIdGuard, IOpenIdBearer } from '@project/module/openid';
-import { TRANSFORM_PRIVATE } from '@project/module/core';
 import { Company } from '@project/common/platform/company';
+import { TRANSFORM_SINGLE } from '@project/module/core';
 import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
@@ -55,6 +55,6 @@ export class InitController extends DefaultController<void, IInitDtoResponse> {
     @OpenIdOfflineValidation()
     @UseGuards(OpenIdGuard)
     public async executeExtended(@OpenIdBearer() bearer: IOpenIdBearer): Promise<IInitDtoResponse> {
-        return { user: bearer.user.toObject({ groups: TRANSFORM_PRIVATE }), company: bearer.user.company?.toObject({ groups: TRANSFORM_PRIVATE }) };
+        return { user: bearer.user.toObject({ groups: TRANSFORM_SINGLE }), company: bearer.user.company?.toObject({ groups: TRANSFORM_SINGLE }) };
     }
 }

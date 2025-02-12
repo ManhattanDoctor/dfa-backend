@@ -43,6 +43,12 @@ export class UserPreferencesEntity extends TypeormValidableEntity implements Use
     @IsNumber()
     public id: number;
 
+    @Expose({ groups: TRANSFORM_PRIVATE })
+    @Column()
+    @IsEmail()
+    @MaxLength(USER_PREFERENCES_EMAIL_MAX_LENGTH)
+    public email: string;
+
     @Column()
     @IsOptional()
     @Length(USER_PREFERENCES_NAME_MIN_LENGTH, USER_PREFERENCES_NAME_MAX_LENGTH)
@@ -53,13 +59,6 @@ export class UserPreferencesEntity extends TypeormValidableEntity implements Use
     @IsOptional()
     @IsEnum(UserPreferencesTheme)
     public theme?: UserPreferencesTheme;
-
-    @Expose({ groups: TRANSFORM_PRIVATE })
-    @Column()
-    @IsOptional()
-    @IsEmail()
-    @MaxLength(USER_PREFERENCES_EMAIL_MAX_LENGTH)
-    public email?: string;
 
     @Expose({ groups: TRANSFORM_PRIVATE })
     @Column()

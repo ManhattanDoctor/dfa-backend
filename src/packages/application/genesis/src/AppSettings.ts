@@ -1,12 +1,10 @@
 import { IHlfSettings } from '@project/common/platform/settings';
-import { IDatabaseSettings, IWebSettings, EnvSettingsStorage } from '@ts-core/backend';
-import { IKeycloakAdministratorSettings, IKeycloakSettings } from '@ts-core/openid-common';
-import { AbstractSettingsStorage, ILogger, LoggerLevel, UrlUtil } from '@ts-core/common';
-import * as jwk2pem from 'jwk-to-pem';
-import axios from 'axios';
+import { IDatabaseSettings, EnvSettingsStorage } from '@ts-core/backend';
+import { IKeycloakAdministratorSettings } from '@ts-core/openid-common';
+import { ILogger, LoggerLevel, UrlUtil } from '@ts-core/common';
 import * as _ from 'lodash';
 
-export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDatabaseSettings {
+export class AppSettings extends EnvSettingsStorage implements IDatabaseSettings {
     // --------------------------------------------------------------------------
     //
     //  Public Properties
@@ -14,18 +12,6 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
     // --------------------------------------------------------------------------
 
     public logger?: ILogger;
-
-    // --------------------------------------------------------------------------
-    //
-    //  Public Methods
-    //
-    // --------------------------------------------------------------------------
-
-    public async initialize(): Promise<void> {
-        let { url, realm } = this.keycloak;
-        let { data } = await axios.get(`${UrlUtil.parseUrl(url)}realms/${realm}/protocol/openid-connect/certs`);
-        this.data['KEYCLOAK_REALM_PUBLIC_KEY'] = AbstractSettingsStorage.parsePEM(jwk2pem(_.find(data.keys, { use: 'sig' })));
-    }
 
     // --------------------------------------------------------------------------
     //
@@ -69,20 +55,6 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
 
     // --------------------------------------------------------------------------
     //
-    //  Web Properties
-    //
-    // --------------------------------------------------------------------------
-
-    public get webPort(): number {
-        return this.getValue('WEB_PORT');
-    }
-
-    public get webHost(): string {
-        return this.getValue('WEB_HOST', 'localhost');
-    }
-
-    // --------------------------------------------------------------------------
-    //
     //  Explorer Properties
     //
     // --------------------------------------------------------------------------
@@ -97,13 +69,16 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
     //
     // --------------------------------------------------------------------------
 
-    public get keycloak(): IKeycloakSettings {
+    public get keycloakGenesisLogin(): string {
+        return this.getValue('KEYCLOAK_GENESIS_LOGIN')
+    }
+
+    public get keycloak(): IKeycloakAdministratorSettings {
         return {
             url: this.getValue('KEYCLOAK_URL'),
             realm: this.getValue('KEYCLOAK_REALM'),
-            clientId: this.getValue('KEYCLOAK_CLIENT_ID'),
-            clientSecret: this.getValue('KEYCLOAK_CLIENT_SECRET'),
-            realmPublicKey: this.getValue('KEYCLOAK_REALM_PUBLIC_KEY')
+            userName: this.getValue('KEYCLOAK_ADMINISTRATOR_NAME'),
+            userPassword: this.getValue('KEYCLOAK_ADMINISTRATOR_PASSWORD'),
         }
     }
 }

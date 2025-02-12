@@ -1,0 +1,21 @@
+{
+    "name": "@dfa/backend-genesis",
+    "version": "1.0.0",
+    "license": "MIT",
+    "author": "Renat Gubaev",
+    "scripts": {
+        "start": "npm run seed && ts-node --transpile-only main.ts",
+        "build": "tsc",
+        "typeorm": "ts-node ../../../../node_modules/typeorm/cli",
+        "seed": "npm run typeorm migration:run -- -d ormconfig.seed.ts"
+    },
+    "dependencies": {
+        "pg": "^8.7.1"
+    },
+    "devDependencies": {
+        "ts-node": "^10.9.1",
+        "ts-node-dev": "^1.1.8",
+        "tsconfig-paths": "^3.12.0",
+        "typescript": "^4.5.5"
+    }
+}

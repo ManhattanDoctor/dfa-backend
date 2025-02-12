@@ -1,7 +1,7 @@
 
 import { TypeormValidableEntity } from '@ts-core/backend';
 import { TransformUtil, ObjectUtil } from '@ts-core/common';
-import { ClassTransformOptions, Exclude } from 'class-transformer';
+import { ClassTransformOptions, Exclude, Expose } from 'class-transformer';
 import { IsEnum, IsNumber, IsString, IsOptional, IsUUID } from 'class-validator';
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Key, KeyAlgorithm } from '@project/common/custody';
@@ -49,6 +49,7 @@ export class KeyEntity extends TypeormValidableEntity implements Key {
     @CreateDateColumn({ name: 'created' })
     public created: Date;
 
+    @Exclude()
     @Column({ name: 'public_key' })
     @IsString()
     public publicKey: string;
@@ -74,6 +75,7 @@ export class KeyEntity extends TypeormValidableEntity implements Key {
     //
     // --------------------------------------------------------------------------
 
+    @Expose()
     public get value(): string {
         return this.publicKey;
     }
