@@ -49,10 +49,9 @@ export class KeyEntity extends TypeormValidableEntity implements Key {
     @CreateDateColumn({ name: 'created' })
     public created: Date;
 
-    @Exclude()
-    @Column({ name: 'public_key' })
+    @Column()
     @IsString()
-    public publicKey: string;
+    public value: string;
 
     @Exclude()
     @Column({ name: 'private_key' })
@@ -67,16 +66,5 @@ export class KeyEntity extends TypeormValidableEntity implements Key {
 
     public toObject(options?: ClassTransformOptions): Key {
         return TransformUtil.fromClass<Key>(this, options);
-    }
-
-    // --------------------------------------------------------------------------
-    //
-    //  Public Properties
-    //
-    // --------------------------------------------------------------------------
-
-    @Expose()
-    public get value(): string {
-        return this.publicKey;
     }
 }

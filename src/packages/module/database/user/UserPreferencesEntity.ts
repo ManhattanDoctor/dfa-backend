@@ -43,16 +43,15 @@ export class UserPreferencesEntity extends TypeormValidableEntity implements Use
     @IsNumber()
     public id: number;
 
+    @Column()
+    @Length(USER_PREFERENCES_NAME_MIN_LENGTH, USER_PREFERENCES_NAME_MAX_LENGTH)
+    public name: string;
+    
     @Expose({ groups: TRANSFORM_PRIVATE })
     @Column()
     @IsEmail()
     @MaxLength(USER_PREFERENCES_EMAIL_MAX_LENGTH)
     public email: string;
-
-    @Column()
-    @IsOptional()
-    @Length(USER_PREFERENCES_NAME_MIN_LENGTH, USER_PREFERENCES_NAME_MAX_LENGTH)
-    public name?: string;
 
     @Expose({ groups: TRANSFORM_PRIVATE })
     @Column({ type: 'varchar' })

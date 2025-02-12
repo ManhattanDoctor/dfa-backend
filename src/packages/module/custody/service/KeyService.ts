@@ -1,21 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { ExtendedError, IKeyAsymmetric, Logger, LoggerWrapper, TraceUtil, Ed25519, UnreachableStatementError } from '@ts-core/common';
+import { IKeyAsymmetric, Logger, LoggerWrapper, TraceUtil, Ed25519, UnreachableStatementError } from '@ts-core/common';
 import { KeyEntity } from '../entity';
-import { Key, KeyAlgorithm, KeyForbiddenError, KeyNotFoundError } from '@project/common/custody';
+import { KeyAlgorithm, KeyForbiddenError, KeyNotFoundError } from '@project/common/custody';
 import { GostR3410 } from '@ts-core/crypto-gost';
 import { RSA } from '@ts-core/crypto-rsa';
 import * as _ from 'lodash';
 
 @Injectable()
 export class KeyService extends LoggerWrapper {
-    // --------------------------------------------------------------------------
-    //
-    //  Properties
-    //
-    // --------------------------------------------------------------------------
-
-
-
     // --------------------------------------------------------------------------
     //
     //  Constructor
@@ -74,7 +66,7 @@ export class KeyService extends LoggerWrapper {
         item.uid = TraceUtil.generate();
         item.owner = owner;
         item.algorithm = algorithm;
-        item.publicKey = publicKey;
+        item.value = publicKey;
         item.privateKey = privateKey;
         return item.save();
     }

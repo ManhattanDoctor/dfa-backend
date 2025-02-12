@@ -29,10 +29,10 @@ export class AddUser1627121260001 implements MigrationInterface {
                 "user_id" varchar
                     constraint "user_preferences_user_id_key" unique
                     constraint "user_preferences_user_id_fkey" references "user" on delete cascade,
-                "name" varchar,
+                "name" varchar not null,
+                "email" varchar not null,
                 "phone" varchar,
                 "theme" varchar,
-                "email" varchar,
                 "picture" varchar,
                 "language" varchar
             );
@@ -43,7 +43,6 @@ export class AddUser1627121260001 implements MigrationInterface {
     public async down(queryRunner: QueryRunner): Promise<any> {
         const sql = `
             drop table if exists "user" cascade;
-            drop table if exists "user_statistics" cascade;
             drop table if exists "user_preferences" cascade;
         `;
         await queryRunner.query(sql);

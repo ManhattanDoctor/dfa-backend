@@ -6,7 +6,7 @@
     "scripts": {
         "start": "npm run start --prefix src/packages/application/api",
         "build": "npm run build --prefix src/packages/application/api",
-        "reset": "npm run drop --prefix src/packages/application/api && npm run migration --prefix src/packages/application/api && npm run seed --prefix src/packages/application/genesis",
+        "reset": "npm run drop --prefix src/packages/application/api && npm run migration --prefix src/packages/application/api && npm run seed --prefix src/packages/application/genesis && npm run start --prefix src/packages/application/genesis",
         "api:docker:image:build": "docker build -t dfa-platform-api -f ./docker/api/Dockerfile .",
         "api:docker:image:update": "docker pull dfa-platform-api",
         "api:docker:image:remove": "docker rmi -f dfa-platform-api",
@@ -31,7 +31,7 @@
         "@ts-core/backend-nestjs-openid": "~10.1.10",
         "@ts-core/crypto-gost": "~3.0.7",
         "@ts-core/crypto-rsa": "~3.0.4",
-        "@ts-core/openid-common": "~1.0.9",
+        "@ts-core/openid-common": "~1.0.11",
         "@ts-core/socket-server": "~3.0.19",
         "@types/request-ip": "^0.0.41",
         "jwk-to-pem": "^2.0.7"
