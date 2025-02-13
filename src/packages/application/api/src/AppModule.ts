@@ -18,6 +18,7 @@ import { ConfigController, CustodyKeyGetController, CustodyKeySignController } f
 import { LanguageModule } from '@project/module/language';
 import { TaxModule } from '@project/module/tax';
 import { CustodyModule } from '@project/module/custody';
+import { CompanyModule } from '@project/module/company';
 
 @Injectable()
 export class AppModule extends ModeApplication<AppSettings> implements OnApplicationBootstrap {
@@ -36,7 +37,7 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
                 DatabaseModule,
                 CacheModule.forRoot(),
                 LoggerModule.forRoot(settings),
-                LanguageModule.forRoot(`${path}/language`),
+                // LanguageModule.forRoot(`${path}/language`),
                 TypeOrmModule.forRoot(this.getOrmConfig(settings)),
                 TransportModule.forRoot({ type: TransportType.LOCAL }),
                 ThrottlerModule.forRoot([THROTTLE_DEFAULT]),
@@ -46,6 +47,7 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
                 LoginModule,
                 SocketModule,
                 CustodyModule,
+                CompanyModule,
 
                 HlfModule.forRoot(settings.hlf),
                 OpenIdModule.forRoot(settings.keycloak)

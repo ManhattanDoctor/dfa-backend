@@ -4,6 +4,7 @@ import { CompanyEntity, CompanyPreferencesEntity } from '@project/module/databas
 import { Variables } from '@project/common/hlf';
 import { CompanyPreferences, CompanyStatus, CompanyTaxDetails } from '@project/common/platform/company';
 import * as _ from 'lodash';
+import { ImageUtil } from '@project/module/util';
 
 export class AddRootObjects1627121260000 implements MigrationInterface {
 
@@ -20,7 +21,7 @@ export class AddRootObjects1627121260000 implements MigrationInterface {
         }
         let item = CompanyEntity.createEntity({ hlfUid: Variables.seed.user.uid, status: CompanyStatus.ACTIVE });
         item.details = TransformUtil.toClass(CompanyTaxDetails, { inn: '000000000000', founded: new Date(0) })
-        item.preferences = CompanyPreferencesEntity.createEntity({ name: 'PLATFORM COMPANY' });
+        item.preferences = CompanyPreferencesEntity.createEntity({ name: 'Platform company', picture: ImageUtil.getAvatar(Variables.seed.user.uid) });
         await item.save();
     }
 

@@ -63,6 +63,7 @@ export class CompanyPreferencesEntity extends TypeormValidableEntity implements 
     @MaxLength(COMPANY_PREFERENCES_ADDRESS_MAX_LENGTH)
     public address?: string;
 
+    @Column()
     @IsOptional()
     @MaxLength(COMPANY_PREFERENCES_DESCRIPTION_MAX_LENGTH)
     public description?: string;

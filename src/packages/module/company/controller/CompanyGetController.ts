@@ -1,15 +1,15 @@
-import { Controller, Req, Param, Get, UseGuards } from '@nestjs/common';
-import { USER_URL } from '@project/common/platform/api';
-import { User } from '@project/common/platform/user';
+import { Controller, Param, Get, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { COMPANY_URL } from '@project/common/platform/api';
+import { Company } from '@project/common/platform/company';
 import { DefaultController } from '@ts-core/backend';
 import { Logger } from '@ts-core/common';
 import { Swagger } from '@project/module/swagger';
 import { DatabaseService } from '@project/module/database/service';
-import { IUserGetDtoResponse } from '@project/common/platform/api/user';
+import { ICompanyGetDtoResponse } from '@project/common/platform/api/company';
 import { IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
 import { OpenIdBearer } from '@ts-core/backend-nestjs-openid';
 import { OpenIdService } from '@ts-core/openid-common';
-import { getResourceValidationOptions, ResourcePermission, UserNotFoundError } from '@project/common/platform';
+import { getResourceValidationOptions, ResourcePermission, CompanyNotFoundError } from '@project/common/platform';
 import { TRANSFORM_ADMINISTRATOR, TRANSFORM_SINGLE } from '@project/module/core';
 import * as _ from 'lodash';
 
@@ -19,8 +19,8 @@ import * as _ from 'lodash';
 //
 // --------------------------------------------------------------------------
 
-@Controller(`${USER_URL}/:id`)
-export class UserGetController extends DefaultController<number, IUserGetDtoResponse> {
+@Controller(`${COMPANY_URL}/:id`)
+export class CompanyGetController extends DefaultController<number, ICompanyGetDtoResponse> {
     // --------------------------------------------------------------------------
     //
     //  Constructor
@@ -37,9 +37,9 @@ export class UserGetController extends DefaultController<number, IUserGetDtoResp
     //
     // --------------------------------------------------------------------------
 
-    private async validate(id: string, bearer: IOpenIdBearer): Promise<void> {
-        if (id !== bearer.user.id) {
-            await this.openId.validateResource(bearer.token, getResourceValidationOptions(ResourcePermission.USER_READ));
+    private async validate(id: number, bearer: IOpenIdBearer): Promise<void> {
+        if (id !== bearer.user.companyId) {
+            await this.openId.validateResource(bearer.token, getResourceValidationOptions(ResourcePermission.COMPANY_READ));
         }
     }
 
@@ -49,16 +49,16 @@ export class UserGetController extends DefaultController<number, IUserGetDtoResp
     //
     // --------------------------------------------------------------------------
 
-    @Swagger({ name: 'Get user', response: User })
+    @Swagger({ name: 'Get company', response: Company })
     @Get()
     @UseGuards(OpenIdGuard)
-    public async executeExtended(@Param('id') id: string, @OpenIdBearer() bearer: IOpenIdBearer): Promise<IUserGetDtoResponse> {
+    public async executeExtended(@Param('id', ParseIntPipe) id: number, @OpenIdBearer() bearer: IOpenIdBearer): Promise<ICompanyGetDtoResponse> {
         await this.validate(id, bearer);
 
-        let item = await this.database.userGet(id, true);
+        let item = await this.database.companyGet(id, true);
         if (_.isNil(item)) {
-            throw new UserNotFoundError();
+            throw new CompanyNotFoundError();
         }
-        return item.toObject({ groups: id === bearer.user.id ? TRANSFORM_SINGLE : TRANSFORM_ADMINISTRATOR });
+        return item.toObject({ groups: id === bearer.user.companyId ? TRANSFORM_SINGLE : TRANSFORM_ADMINISTRATOR });
     }
 }
