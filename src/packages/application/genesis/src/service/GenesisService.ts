@@ -3,7 +3,7 @@ import { TransportHttp, ExtendedError, Transport, ITransportCommand, TransportCr
 import { ILogger } from '@ts-core/common';
 import { UserEntity, UserPreferencesEntity } from '@project/module/database/user';
 import { UserStatus } from '@project/common/platform/user';
-import { ImageUtil } from '@project/module/util';
+import { ImageUtil } from '@project/common/platform/util';
 import { Variables } from '@project/common/hlf';
 import { Key, KeyAlgorithm } from '@project/common/custody';
 import { KeyAddCommand, KeyGetByOwnerCommand } from '@project/module/custody/transport';
@@ -92,7 +92,7 @@ export class GenesisService extends TransportHttp<IKeycloakAdministratorSettings
             return item;
         }
         item = UserEntity.createEntity({ id, login, status: UserStatus.ACTIVE, companyId });
-        item.preferences = UserPreferencesEntity.createEntity({ name: login, picture: ImageUtil.getAvatar(id), email });
+        item.preferences = UserPreferencesEntity.createEntity({ name: login, picture: ImageUtil.getUser(id), email });
         await item.save();
         this.warn(`User "${login}" added`);
 

@@ -5,7 +5,7 @@ import { ILoginDto, ILoginDtoResponse } from '@project/common/platform/api/login
 import { DatabaseService } from '@project/module/database/service';
 import { UserEntity, UserPreferencesEntity } from '@project/module/database/user';
 import { UserStatus } from '@project/common/platform/user';
-import { ImageUtil } from '@project/module/util';
+import { ImageUtil } from '@project/common/platform/util';
 
 @Injectable()
 export class LoginService extends LoggerWrapper {
@@ -32,7 +32,7 @@ export class LoginService extends LoggerWrapper {
             return;
         }
         let item = UserEntity.createEntity({ id: sub, login: email, status: UserStatus.ACTIVE });
-        item.preferences = UserPreferencesEntity.createEntity({ name: name || email, email: email, picture: ImageUtil.getAvatar(sub) });
+        item.preferences = UserPreferencesEntity.createEntity({ name: name || email, email: email, picture: ImageUtil.getUser(sub) });
         await item.save();
     }
 

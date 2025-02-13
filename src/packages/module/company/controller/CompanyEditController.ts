@@ -10,10 +10,10 @@ import { COMPANY_URL } from '@project/common/platform/api';
 import { Swagger } from '@project/module/swagger';
 import { DatabaseService } from '@project/module/database/service';
 import { Transform } from 'class-transformer';
-import { OpenIdBearer } from '@ts-core/backend-nestjs-openid';
+import { OpenIdBearer, OpenIdResource, OpenIdResourceScope } from '@ts-core/backend-nestjs-openid';
 import { IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
 import { ParseUtil } from '@project/module/util';
-import { getResourceValidationOptions, ResourcePermission, CompanyNotFoundError } from '@project/common/platform';
+import { getResourceValidationOptions, ResourcePermission, CompanyNotFoundError, Resource, ResourceScope } from '@project/common/platform';
 import { TRANSFORM_ADMINISTRATOR, TRANSFORM_SINGLE } from '@project/module/core';
 import { OpenIdService } from '@ts-core/openid-common';
 import * as _ from 'lodash';
@@ -109,12 +109,6 @@ export class CompanyEditController extends DefaultController<ICompanyEditDto, IC
     //
     // --------------------------------------------------------------------------
 
-    private async validate(id: number, params: ICompanyEditDto, bearer: IOpenIdBearer): Promise<void> {
-        if (id !== bearer.user.companyId || !_.isNil(params.status)) {
-            await this.openId.validateResource(bearer.token, getResourceValidationOptions(ResourcePermission.COMPANY_EDIT));
-        }
-    }
-
     private copyPartial<U>(from: Partial<U>, to: U): any {
         let excludeKeys = ObjectUtil.keys(from).filter(key => _.isUndefined(from[key]));
         ObjectUtil.copyPartial(from, to, null, excludeKeys);
@@ -128,10 +122,10 @@ export class CompanyEditController extends DefaultController<ICompanyEditDto, IC
 
     @Swagger({ name: 'Company edit', response: Company })
     @Put()
+    @OpenIdResource(Resource.COMPANY)
+    @OpenIdResourceScope(ResourceScope.EDIT)
     @UseGuards(OpenIdGuard)
     public async executeExtended(@Param('id', ParseIntPipe) id: number, @Body() params: CompanyEditDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<ICompanyEditDtoResponse> {
-        await this.validate(id, params, bearer);
-
         let item = await this.database.companyGet(id, true);
         if (_.isNil(item)) {
             throw new CompanyNotFoundError();

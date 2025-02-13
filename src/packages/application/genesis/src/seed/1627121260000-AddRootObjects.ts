@@ -2,9 +2,9 @@ import { TransformUtil } from '@ts-core/common';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { CompanyEntity, CompanyPreferencesEntity } from '@project/module/database/company';
 import { Variables } from '@project/common/hlf';
-import { CompanyPreferences, CompanyStatus, CompanyTaxDetails } from '@project/common/platform/company';
+import { CompanyStatus, CompanyTaxDetails } from '@project/common/platform/company';
+import { ImageUtil } from '@project/common/platform/util';
 import * as _ from 'lodash';
-import { ImageUtil } from '@project/module/util';
 
 export class AddRootObjects1627121260000 implements MigrationInterface {
 
@@ -21,7 +21,7 @@ export class AddRootObjects1627121260000 implements MigrationInterface {
         }
         let item = CompanyEntity.createEntity({ hlfUid: Variables.seed.user.uid, status: CompanyStatus.ACTIVE });
         item.details = TransformUtil.toClass(CompanyTaxDetails, { inn: '000000000000', founded: new Date(0) })
-        item.preferences = CompanyPreferencesEntity.createEntity({ name: 'Platform company', picture: ImageUtil.getAvatar(Variables.seed.user.uid) });
+        item.preferences = CompanyPreferencesEntity.createEntity({ name: 'Platform company', picture: ImageUtil.getCompany(Variables.seed.user.uid) });
         await item.save();
     }
 
