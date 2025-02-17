@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Logger, LoggerWrapper } from '@ts-core/common';
-import { SelectQueryBuilder } from 'typeorm';
+import { Connection, DataSource, SelectQueryBuilder } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { UserEntity } from '../user';
 import * as _ from 'lodash';
@@ -16,7 +16,7 @@ export class DatabaseService extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger) {
+    constructor(logger: Logger, public source: DataSource) {
         super(logger);
     }
 

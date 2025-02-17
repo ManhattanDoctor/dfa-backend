@@ -7,6 +7,8 @@ import * as _ from 'lodash';
 import { AppSettings } from '../AppSettings';
 import { KeycloakAdministratorTransport } from './KeycloakAdminTransport';
 import { KeycloakTokenManager } from '@ts-core/openid-common';
+import { OpenIdSynchronizeCommand, OpenIdUpdateCommand } from '@project/module/openid/transport';
+import { CompanyStatus } from '@project/common/platform/company';
 
 
 @Injectable()
@@ -44,6 +46,7 @@ export class InitializeService extends LoggerWrapper {
     public async initialize(): Promise<void> {
         // await this.hlf.initialize();
 
+        console.log(await this.transport.sendListen(new OpenIdSynchronizeCommand('renat.gubaev@mail.ru')));
         /*
         let item = new KeycloakAdministratorTransport(this.logger, {
             url: 'http://localhost:8080',

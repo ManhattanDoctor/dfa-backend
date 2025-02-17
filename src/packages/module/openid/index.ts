@@ -1,4 +1,4 @@
 export * from './openid.module';
 //
-export * from './OpenIdGuard';
-export * from './OpenIdResourcePermission';
+export * from './lib/OpenIdGuard';
+export * from './lib/OpenIdResourcePermission';

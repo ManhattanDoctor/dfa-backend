@@ -38,9 +38,10 @@ export class CompanyGetController extends DefaultController<number, ICompanyGetD
     // --------------------------------------------------------------------------
 
     private async validate(id: number, bearer: IOpenIdBearer): Promise<void> {
-        if (id !== bearer.user.companyId) {
-            // await this.openId.validateResource(bearer.token.value, getResourceValidationOptions(ResourcePermission.COMPANY_READ));
+        if (id === bearer.token.content.company?.id) {
+            return;
         }
+        await this.openId.validateResource(bearer.token.value, getResourceValidationOptions(ResourcePermission.COMPANY_READ));
     }
 
     // --------------------------------------------------------------------------
@@ -59,6 +60,6 @@ export class CompanyGetController extends DefaultController<number, ICompanyGetD
         if (_.isNil(item)) {
             throw new CompanyNotFoundError();
         }
-        return item.toObject({ groups: id === bearer.user.companyId ? TRANSFORM_SINGLE : TRANSFORM_ADMINISTRATOR });
+        return item.toObject({ groups: TRANSFORM_SINGLE });
     }
 }

@@ -2,6 +2,7 @@ import { DynamicModule, OnApplicationBootstrap, Injectable } from '@nestjs/commo
 import { CacheModule, LoggerModule, TransportModule, TransportType } from '@ts-core/backend-nestjs';
 import { AppSettings } from './AppSettings';
 import { DatabaseModule } from '@project/module/database';
+import { DataSource } from 'typeorm';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Logger, Transport } from '@ts-core/common';
 import { IDatabaseSettings, ModeApplication } from '@ts-core/backend';
@@ -62,6 +63,10 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
                     provide: AppSettings,
                     useValue: settings
                 },
+                {
+                    provide: DataSource,
+                    useValue: new DataSource(AppModule.getOrmConfig(settings) as any)
+                },
                 InitializeService,
             ]
         };
@@ -81,27 +86,15 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
             username: settings.databaseUserName,
             password: settings.databaseUserPassword,
             database: settings.databaseName,
-
-            synchronize: false,
-            logging: false,
             entities: [
                 `${modulePath()}/database/**/*Entity.{ts,js}`,
                 `${nodeModulePath()}/@hlf-explorer/monitor/cjs/**/*Entity.{ts,js}`,
                 `${nodeModulePathBuild()}/@hlf-explorer/monitor/cjs/**/*Entity.{ts,js}`,
                 //
                 `${modulePath()}/custody/**/*Entity.{ts,js}`,
-            ],
-            migrations: [
-                __dirname + '/migration/*.{ts,js}',
-                `${nodeModulePath()}/@hlf-explorer/monitor/cjs/**/*Migration.{ts,js}`,
-                `${nodeModulePathBuild()}/@hlf-explorer/monitor/cjs/**/*Migration.{ts,js}`,
-                //
-                `${modulePath()}/custody/migration/*.{ts,js}`,
-            ],
-            migrationsRun: true
+            ]
         }
     }
-
 
     // --------------------------------------------------------------------------
     //

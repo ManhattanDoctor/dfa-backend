@@ -97,10 +97,12 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
     //
     // --------------------------------------------------------------------------
 
-    public get keycloak(): IKeycloakSettings {
+    public get keycloak(): IKeycloakSettings & IKeycloakAdministratorSettings{
         return {
             url: this.getValue('KEYCLOAK_URL'),
             realm: this.getValue('KEYCLOAK_REALM'),
+            login: this.getValue('KEYCLOAK_LOGIN'),
+            password: this.getValue('KEYCLOAK_PASSWORD'),
             clientId: this.getValue('KEYCLOAK_CLIENT_ID'),
             clientSecret: this.getValue('KEYCLOAK_CLIENT_SECRET'),
             realmPublicKey: this.getValue('KEYCLOAK_REALM_PUBLIC_KEY')

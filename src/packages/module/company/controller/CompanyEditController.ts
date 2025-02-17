@@ -110,8 +110,7 @@ export class CompanyEditController extends DefaultController<ICompanyEditDto, IC
     // --------------------------------------------------------------------------
 
     private copyPartial<U>(from: Partial<U>, to: U): any {
-        let excludeKeys = ObjectUtil.keys(from).filter(key => _.isUndefined(from[key]));
-        ObjectUtil.copyPartial(from, to, null, excludeKeys);
+        ObjectUtil.copyPartial(from, to, null, ObjectUtil.keys(from).filter(key => _.isUndefined(from[key])));
     }
 
     // --------------------------------------------------------------------------

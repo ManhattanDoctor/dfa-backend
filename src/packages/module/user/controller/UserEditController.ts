@@ -103,14 +103,14 @@ export class UserEditController extends DefaultController<IUserEditDto, IUserEdi
     // --------------------------------------------------------------------------
 
     private async validate(id: string, params: IUserEditDto, bearer: IOpenIdBearer): Promise<void> {
-        if (id !== bearer.token.content.sub || !_.isNil(params.status)) {
-            await this.openId.validateResource(bearer.token.value, getResourceValidationOptions(ResourcePermission.USER_EDIT));
+        if (id === bearer.token.content.sub && _.isNil(params.status)) {
+            return;
         }
+        await this.openId.validateResource(bearer.token.value, getResourceValidationOptions(ResourcePermission.USER_EDIT));
     }
 
     private copyPartial<U>(from: Partial<U>, to: U): any {
-        let excludeKeys = ObjectUtil.keys(from).filter(key => _.isUndefined(from[key]));
-        ObjectUtil.copyPartial(from, to, null, excludeKeys);
+        ObjectUtil.copyPartial(from, to, null, ObjectUtil.keys(from).filter(key => _.isUndefined(from[key])));
     }
 
     // --------------------------------------------------------------------------
@@ -127,7 +127,7 @@ export class UserEditController extends DefaultController<IUserEditDto, IUserEdi
 
         let item = await this.database.userGet(id, true);
         if (_.isNil(item)) {
-            throw new UserNotFoundError();
+            throw new UserNotFoundError(id);
         }
         if (!_.isNil(params.status)) {
             item.status = params.status;

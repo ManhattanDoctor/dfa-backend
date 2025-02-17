@@ -13,8 +13,8 @@ import { UserEditCommand, UserGetCommand } from '@project/common/hlf/transport';
 import { LedgerApiClient } from '@hlf-explorer/common';
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
 import { IHlfSettings } from '@project/common/platform/settings';
-import * as _ from 'lodash';
 import { Company } from '@project/common/platform/company';
+import * as _ from 'lodash';
 
 export class GenesisService extends KeycloakAdministratorTransport {
 
@@ -90,43 +90,60 @@ export class GenesisService extends KeycloakAdministratorTransport {
     }
 
     private async addOpenIdUserIfNeed(login: string, company: Company): Promise<IOpenIdUser> {
-        let item = await this.getUser(login);
-        if (!_.isNil(item)) {
-            this.log(`OpenId user "${login}" exists`);
-            return item;
-        }
-
-        let headers = { 'Content-Type': 'application/json' };
+        let enabled = true;
+        let lastName = login;
+        let firstName = login;
         let attributes = { company: JSON.stringify({ id: company.id, status: company.status }) };
+        let credentials = [{ type: 'password', value: 'password', temporary: true }];
+        let emailVerified = false;
         let requiredActions = ['CONFIGURE_TOTP', 'UPDATE_PASSWORD', 'VERIFY_EMAIL'];
-        await this.call(`admin/realms/${this.settings.realm}/users`, {
-            data: {
-                enabled: true,
-                email: login,
-                username: login,
-                firstName: login,
-                lastName: login,
-                credentials: [
-                    {
-                        type: 'password',
-                        value: login,
-                        temporary: true
-                    }
-                ],
-                requiredActions,
-                attributes,
-            },
-            method: 'post'
-        });
+
+        let item = await this.getUser(login);
+        if (_.isNil(item)) {
+            item = await this.call(`admin/realms/${this.settings.realm}/users`, {
+                data: {
+                    email: login,
+                    username: login,
+                    enabled,
+                    lastName,
+                    firstName,
+                    attributes,
+                    credentials,
+                    emailVerified,
+                    requiredActions,
+                },
+                method: 'post'
+            });
+            this.warn(`OpenId user "${login}" added`);
+        }
+        else {
+            await this.call(`admin/realms/${this.settings.realm}/users/${item.id}`, {
+                data: {
+                    email: item.email,
+                    enabled,
+                    lastName,
+                    firstName,
+                    attributes,
+                    credentials,
+                    emailVerified,
+                    requiredActions,
+                },
+                method: 'put',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            this.log(`OpenId user "${login}" updated`);
+        }
+        return item;
+
         /*
-        this.warn(`OpenId user "${login}" added`);
+        let headers = { 'Content-Type': 'application/json' };
         item = await this.getUser(login);
         await this.call(`admin/realms/${this.settings.realm}/users/${item.id}/reset-password`, {
             data: JSON.stringify({ type: 'password', value: login, temporary: true }),
             method: 'put',
             headers
         });
-        /*
+
         this.warn(`User "${login}" password reset, temporary password is "${login}"`);
         await this.call(`admin/realms/${this.settings.realm}/users/${item.id}`, {
             data: JSON.stringify({ requiredActions }),
@@ -150,10 +167,10 @@ export class GenesisService extends KeycloakAdministratorTransport {
     //
     // --------------------------------------------------------------------------
 
-    private async getUser(username: string): Promise<IOpenIdUser> {
+    private async getUser(login: string): Promise<IOpenIdUser> {
         // Don't escape all chars because, for example, "@" char works without escaping
-        username = username.replaceAll("\\+", "%2B");
-        let items = await this.call(`admin/realms/${this.settings.realm}/users`, { data: { username, exact: true } });
+        login = login.replaceAll("\\+", "%2B");
+        let items = await this.call(`admin/realms/${this.settings.realm}/users`, { data: { username: login, exact: true } });
         return !_.isEmpty(items) ? _.first<IOpenIdUser>(items) : null;
     }
 
@@ -166,11 +183,11 @@ export class GenesisService extends KeycloakAdministratorTransport {
     public async initialize(login: string): Promise<void> {
         let company = await this.companyCheck();
         let key = await this.addKeyIfNeed(company.hlfUid);
+        await this.changeKeyIfNeed(company.hlfUid, key);
 
         let openId = await this.addOpenIdUserIfNeed(login, company);
         await this.addUserIfNeed(openId.id, login, company.id, openId.email);
 
-        await this.changeKeyIfNeed(company.hlfUid, key);
         this.log('Genesis completed');
         process.exit();
     }

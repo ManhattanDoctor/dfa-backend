@@ -5,7 +5,7 @@ import { DatabaseModule } from '@project/module/database';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Logger, Transport } from '@ts-core/common';
 import { IDatabaseSettings, ModeApplication } from '@ts-core/backend';
-import { modulePath } from '@project/module';
+import { modulePath, nodeModulePath, nodeModulePathBuild } from '@project/module';
 import { GenesisService } from './service';
 import { CustodyModule } from '@project/module/custody';
 import { DatabaseService } from '@project/module/database/service';
@@ -24,7 +24,7 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
             imports: [
                 DatabaseModule,
                 LoggerModule.forRoot(settings),
-                TypeOrmModule.forRoot(this.getOrmConfig(settings)),
+                TypeOrmModule.forRoot(this.getOrmConfigMigration(settings)),
                 TransportModule.forRoot({ type: TransportType.LOCAL }),
 
                 CustodyModule,
@@ -49,7 +49,33 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
     //
     // --------------------------------------------------------------------------
 
-    public static getOrmConfig(settings: IDatabaseSettings): TypeOrmModuleOptions {
+    public static getOrmConfigMigration(settings: IDatabaseSettings): TypeOrmModuleOptions {
+        return {
+            type: 'postgres',
+            host: settings.databaseHost,
+            port: settings.databasePort,
+            username: settings.databaseUserName,
+            password: settings.databaseUserPassword,
+            database: settings.databaseName,
+            entities: [
+                `${modulePath()}/database/**/*Entity.{ts,js}`,
+                `${nodeModulePath()}/@hlf-explorer/monitor/cjs/**/*Entity.{ts,js}`,
+                `${nodeModulePathBuild()}/@hlf-explorer/monitor/cjs/**/*Entity.{ts,js}`,
+                //
+                `${modulePath()}/custody/**/*Entity.{ts,js}`,
+            ],
+            migrations: [
+                __dirname + '/migration/*.{ts,js}',
+                `${nodeModulePath()}/@hlf-explorer/monitor/cjs/**/*Migration.{ts,js}`,
+                `${nodeModulePathBuild()}/@hlf-explorer/monitor/cjs/**/*Migration.{ts,js}`,
+                //
+                `${modulePath()}/custody/migration/*.{ts,js}`,
+            ],
+            migrationsRun: true
+        }
+    }
+
+    public static getOrmConfigSeed(settings: IDatabaseSettings): TypeOrmModuleOptions {
         return {
             name: 'seed',
             type: 'postgres',
@@ -58,8 +84,6 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
             username: settings.databaseUserName,
             password: settings.databaseUserPassword,
             database: settings.databaseName,
-            synchronize: false,
-            logging: false,
             entities: [
                 `${modulePath()}/custody/**/*Entity.{ts,js}`,
                 `${modulePath()}/database/**/*Entity.{ts,js}`

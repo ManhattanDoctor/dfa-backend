@@ -1,34 +1,22 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { DefaultController } from '@ts-core/backend';
-import { Logger } from '@ts-core/common';
-import { Type } from 'class-transformer';
-import { IsDefined, IsEnum, IsBase64, ValidateIf, ValidateNested, IsOptional, IsString } from 'class-validator';
-import * as _ from 'lodash';
+import { Transport, Logger } from '@ts-core/common';
+import { Transform, Type } from 'class-transformer';
+import { IsDefined, ValidateNested, IsOptional, IsString, Length, IsPhoneNumber, MaxLength, IsEmail, IsUrl } from 'class-validator';
 import { Swagger } from '@project/module/swagger';
-import { UserGuard, UserGuardOptions } from '@project/module/guard';
-import { IUserHolder, UserEntity, UserRoleEntity } from '@project/module/database/user';
 import { DatabaseService } from '@project/module/database/service';
-import { ObjectUtil } from '@ts-core/common';
 import { COMPANY_URL } from '@project/common/platform/api';
 import { ICompanyAddDto, ICompanyAddDtoResponse } from '@project/common/platform/api/company';
-import { Company, CompanyPreferences, CompanyStatus, CompanyType, COMPANY_ADD_TYPE } from '@project/common/platform/company';
+import { Company, CompanyPreferences, CompanyStatus, COMPANY_PREFERENCES_NAME_MIN_LENGTH, COMPANY_PREFERENCES_NAME_MAX_LENGTH, COMPANY_PREFERENCES_PHONE_MAX_LENGTH, COMPANY_PREFERENCES_EMAIL_MAX_LENGTH, COMPANY_PREFERENCES_PICTURE_MAX_LENGTH, COMPANY_PREFERENCES_WEBSITE_MAX_LENGTH, COMPANY_PREFERENCES_ADDRESS_MAX_LENGTH, COMPANY_PREFERENCES_DESCRIPTION_MAX_LENGTH, CompanyTaxDetails } from '@project/common/platform/company';
 import { CompanyEntity, CompanyPreferencesEntity } from '@project/module/database/company';
-import { NalogService } from '@project/module/nalog/service';
-import { LedgerCompanyRole } from '@project/common/ledger/role';
-import { PaymentAggregator } from '@project/common/platform/payment/aggregator';
-import { CompanyPaymentAggregatorEntity } from '@project/module/database/company';
-import { Transport } from '@ts-core/common';
-import { CryptoEncryptCommand } from '@project/module/crypto/transport';
-import { CryptoKeyType } from '@project/common/platform/crypto';
-import { TransformGroup } from '@project/module/database';
-import { FileEntity } from '@project/module/database/file';
-import { FileService } from '@project/module/file/service';
-import { FileLinkType } from '@project/common/platform/file';
-import { CompanyFileType } from '@project/common/platform/company';
-import { TraceUtil } from '@ts-core/common';
-import { Ed25519 } from '@ts-core/common';
-import { CompanyNotUndefinedError, CompanyPaymentAggregatorUndefinedError, CompanyStatusInvalidError, CompanyTypeInvalidError } from '@project/module/core/middleware';
+import { ParseUtil } from '@project/module/util';
+import { IOpenIdBearer, OpenIdGuard, OpenIdResourcePermission } from '@project/module/openid';
+import { OpenIdBearer } from '@ts-core/backend-nestjs-openid';
+import { ResourcePermission } from '@project/common/platform';
+import { TRANSFORM_SINGLE } from '@project/module/core';
+import * as _ from 'lodash';
+import { UserEntity } from '@project/module/database/user';
 
 // --------------------------------------------------------------------------
 //
@@ -36,26 +24,65 @@ import { CompanyNotUndefinedError, CompanyPaymentAggregatorUndefinedError, Compa
 //
 // --------------------------------------------------------------------------
 
-class CompanyAddPreferences extends CompanyPreferences {
-    @IsBase64()
-    declare public picture?: string;
+class CompanyPreferencesDto implements CompanyPreferences {
+    @ApiProperty()
+    @Transform(ParseUtil.inputString)
+    @Length(COMPANY_PREFERENCES_NAME_MIN_LENGTH, COMPANY_PREFERENCES_NAME_MAX_LENGTH)
+    public name: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @Transform(ParseUtil.inputString)
+    @IsPhoneNumber()
+    @MaxLength(COMPANY_PREFERENCES_PHONE_MAX_LENGTH)
+    public phone?: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @Transform(ParseUtil.inputString)
+    @IsEmail()
+    @MaxLength(COMPANY_PREFERENCES_EMAIL_MAX_LENGTH)
+    public email?: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @Transform(ParseUtil.inputString)
+    @IsUrl()
+    @MaxLength(COMPANY_PREFERENCES_PICTURE_MAX_LENGTH)
+    public picture?: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @Transform(ParseUtil.inputString)
+    @IsUrl()
+    @MaxLength(COMPANY_PREFERENCES_WEBSITE_MAX_LENGTH)
+    public website?: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @Transform(ParseUtil.inputString)
+    @MaxLength(COMPANY_PREFERENCES_ADDRESS_MAX_LENGTH)
+    public address?: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @Transform(ParseUtil.inputString)
+    @MaxLength(COMPANY_PREFERENCES_DESCRIPTION_MAX_LENGTH)
+    public description?: string;
 }
 
 export class CompanyAddDto implements ICompanyAddDto {
     @ApiProperty()
-    @IsEnum(CompanyType)
-    type: CompanyType;
+    @IsDefined()
+    @Type(() => CompanyTaxDetails)
+    @ValidateNested()
+    public details: CompanyTaxDetails;
 
     @ApiProperty()
     @IsDefined()
+    @Type(() => CompanyPreferencesDto)
     @ValidateNested()
-    @Type(() => CompanyAddPreferences)
-    preferences: CompanyAddPreferences;
-
-    @ApiPropertyOptional()
-    @ValidateIf(item => item.type === CompanyType.NKO)
-    @IsDefined()
-    paymentAggregator: Partial<PaymentAggregator>;
+    public preferences: CompanyPreferencesDto;
 
     @ApiPropertyOptional()
     @IsOptional()
@@ -71,7 +98,7 @@ export class CompanyAddController extends DefaultController<ICompanyAddDto, ICom
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private transport: Transport, private database: DatabaseService, private nalog: NalogService, private file: FileService) {
+    constructor(logger: Logger, private transport: Transport, private database: DatabaseService) {
         super(logger);
     }
 
@@ -83,53 +110,17 @@ export class CompanyAddController extends DefaultController<ICompanyAddDto, ICom
 
     @Swagger({ name: 'Company add', response: Company })
     @Post()
-    @UseGuards(UserGuard)
-    @UserGuardOptions({ type: COMPANY_ADD_TYPE })
-    public async executeExtended(@Body() params: CompanyAddDto, @Req() request: IUserHolder): Promise<ICompanyAddDtoResponse> {
-        let user = request.user;
-        if (!_.isNil(user.companyId)) {
-            throw new CompanyNotUndefinedError();
-        }
-        if (params.type === CompanyType.PAYMENT_AGGREGATOR) {
-            throw new CompanyTypeInvalidError({ value: params.type, expected: [CompanyType.NKO, CompanyType.SERVICE] });
-        }
+    @OpenIdResourcePermission(ResourcePermission.COMPANY_ADD)
+    @UseGuards(OpenIdGuard)
+    public async executeExtended(@Body() params: CompanyAddDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<ICompanyAddDtoResponse> {
+        let item = CompanyEntity.createEntity({ status: CompanyStatus.DRAFT });
+        item.details = params.details;
+        item.preferences = CompanyPreferencesEntity.createEntity(params.preferences);
 
-        let [nalog] = await this.nalog.search(params.preferences.inn);
-        ObjectUtil.copyProperties(nalog, params.preferences);
-
-        let item = new CompanyEntity();
-        item.type = params.type;
-        item.status = CompanyStatus.DRAFT;
-        item.preferences = new CompanyPreferencesEntity();
-        item.preferences.picture = '';
-        ObjectUtil.copyPartial(params.preferences, item.preferences, null, ['picture']);
-
-        if (!_.isNil(params.paymentAggregator)) {
-            item.paymentAggregator = new CompanyPaymentAggregatorEntity(params.paymentAggregator);
-            item.paymentAggregator.key = await this.transport.sendListen(new CryptoEncryptCommand({ type: CryptoKeyType.DATABASE, value: Ed25519.keys().privateKey }));
-        }
-
-        await this.database.getConnection().transaction(async manager => {
-            let fileRepository = manager.getRepository(FileEntity);
-            let userRepository = manager.getRepository(UserEntity);
-            let companyRepository = manager.getRepository(CompanyEntity);
-            let roleRepository = manager.getRepository(UserRoleEntity);
-
-            item = await companyRepository.save(item);
-            await roleRepository.save(Object.values(LedgerCompanyRole).map(name => new UserRoleEntity(user.id, name, item.id)));
-
-            user.companyId = item.id;
-            await userRepository.save(user);
-
-            let picture = await this.file.storage.upload(Buffer.from(params.preferences.picture, 'base64'), `${TraceUtil.generate()}.png`, '/company/');
-            let file = await fileRepository.save(FileEntity.createItem(picture, item.id, FileLinkType.COMPANY, CompanyFileType.LOGO));
-            // let file ={path: 'test'};
-            
-            item.preferences.picture = file.path;
-            item = await companyRepository.save(item);
+        await this.database.source.transaction(async manager => {
+            await manager.getRepository(CompanyEntity).save(item);
+            await manager.getRepository(UserEntity).update({ companyId: item.id }, { id: bearer.token.content.sub });
         });
-
-        item = await this.database.companyGet(item.id, request.user);
-        return item.toUserObject({ groups: [TransformGroup.PUBLIC_DETAILS] });
+        return item.toObject({ groups: TRANSFORM_SINGLE });
     }
 }

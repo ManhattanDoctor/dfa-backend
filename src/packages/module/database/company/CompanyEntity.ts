@@ -9,7 +9,7 @@ import { UserEntity } from '../user';
 import { CompanyPreferencesEntity } from './CompanyPreferencesEntity';
 import { UserUtil } from '@hlf-core/common';
 import * as _ from 'lodash';
-import { TRANSFORM_PRIVATE } from '@project/module/core';
+import { TRANSFORM_PRIVATE, TRANSFORM_SINGLE } from '@project/module/core';
 
 @Entity({ name: 'company' })
 export class CompanyEntity extends TypeormValidableEntity implements Company {
@@ -48,7 +48,7 @@ export class CompanyEntity extends TypeormValidableEntity implements Company {
     @CreateDateColumn()
     public created: Date;
 
-    @Expose({ groups: TRANSFORM_PRIVATE })
+    @Expose({ groups: TRANSFORM_SINGLE })
     @Column({ type: 'json', transformer: TypeormJSONTransformer.instance })
     @Type(() => CompanyTaxDetails)
     @ValidateNested()
