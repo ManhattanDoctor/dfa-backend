@@ -13,7 +13,8 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.1.1
     container_name: keycloak
-    command: start --import-realm
+    entrypoint: /opt/keycloak/bin/kc.sh
+    command: build && start-dev --import-realm
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
@@ -22,7 +23,6 @@ services:
       KC_DB_PASSWORD: password
 
       KC_HOSTNAME: localhost
-      KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
 
@@ -42,7 +42,7 @@ services:
       - keycloak-postgres
     volumes:
       - type: bind
-        source: ./custom-scripts.jar
+        source: ./custom-scripts/custom-scripts.jar
         target: /opt/keycloak/providers/custom-scripts.jar
         read_only: true
       - type: bind

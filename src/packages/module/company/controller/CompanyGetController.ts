@@ -39,7 +39,7 @@ export class CompanyGetController extends DefaultController<number, ICompanyGetD
 
     private async validate(id: number, bearer: IOpenIdBearer): Promise<void> {
         if (id !== bearer.user.companyId) {
-            await this.openId.validateResource(bearer.token, getResourceValidationOptions(ResourcePermission.COMPANY_READ));
+            // await this.openId.validateResource(bearer.token.value, getResourceValidationOptions(ResourcePermission.COMPANY_READ));
         }
     }
 

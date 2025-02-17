@@ -3,14 +3,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IInitDtoResponse } from '@project/common/platform/api/login';
 import { User } from '@project/common/platform/user';
 import { DefaultController } from '@ts-core/backend';
-import { OpenIdBearer, OpenIdOfflineValidation } from '@ts-core/backend-nestjs-openid';
+import { OpenIdBearer, OpenIdGetUserInfo, OpenIdOfflineValidation } from '@ts-core/backend-nestjs-openid';
 import { Logger } from '@ts-core/common';
 import { IsNotEmpty } from 'class-validator';
 import { INIT_URL } from '@project/common/platform/api';
 import { OpenIdGuard, IOpenIdBearer } from '@project/module/openid';
 import { Company } from '@project/common/platform/company';
 import { TRANSFORM_SINGLE } from '@project/module/core';
-import * as _ from 'lodash';
+import * as _ from 'lodash'
 
 // --------------------------------------------------------------------------
 //
@@ -52,6 +52,7 @@ export class InitController extends DefaultController<void, IInitDtoResponse> {
     // --------------------------------------------------------------------------
 
     @Get()
+    @OpenIdGetUserInfo()
     @OpenIdOfflineValidation()
     @UseGuards(OpenIdGuard)
     public async executeExtended(@OpenIdBearer() bearer: IOpenIdBearer): Promise<IInitDtoResponse> {

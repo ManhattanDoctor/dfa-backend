@@ -1,0 +1,12 @@
+{
+    "authenticators": [],
+    "policies": [
+        {
+            "name": "Company required",
+            "fileName": "company-required.js",
+            "description": "Gives access only if company assigned"
+        }
+    ],
+    "mappers": [],
+    "saml-mappers": []
+}

@@ -1,5 +1,5 @@
-import { IKeycloakAdministratorSettings } from '@ts-core/openid-common';
-import { TransportHttp, ExtendedError, Transport, ITransportCommand, TransportCryptoManager, TransportCryptoManagerEd25519 } from '@ts-core/common';
+import { IKeycloakAdministratorSettings, KeycloakAdministratorTransport, KeycloakTokenManager } from '@ts-core/openid-common';
+import { Transport, ITransportCommand, TransportCryptoManager, TransportCryptoManagerEd25519 } from '@ts-core/common';
 import { ILogger } from '@ts-core/common';
 import { UserEntity, UserPreferencesEntity } from '@project/module/database/user';
 import { UserStatus } from '@project/common/platform/user';
@@ -14,8 +14,9 @@ import { LedgerApiClient } from '@hlf-explorer/common';
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
 import { IHlfSettings } from '@project/common/platform/settings';
 import * as _ from 'lodash';
+import { Company } from '@project/common/platform/company';
 
-export class GenesisService extends TransportHttp<IKeycloakAdministratorSettings> {
+export class GenesisService extends KeycloakAdministratorTransport {
 
     // --------------------------------------------------------------------------
     //
@@ -32,8 +33,9 @@ export class GenesisService extends TransportHttp<IKeycloakAdministratorSettings
     // --------------------------------------------------------------------------
 
     constructor(logger: ILogger, private transport: Transport, private database: DatabaseService, hlf: IHlfSettings, settings: IKeycloakAdministratorSettings) {
-        super(logger, Object.assign(settings, { method: 'get', baseURL: settings.url, headers: {} }));
+        super(logger, settings);
         this.hlf = new GenesisHlfClient(logger, hlf.url, hlf.name);
+        this.token = new KeycloakTokenManager();
     }
 
     // --------------------------------------------------------------------------
@@ -41,18 +43,6 @@ export class GenesisService extends TransportHttp<IKeycloakAdministratorSettings
     //  Check Methods
     //
     // --------------------------------------------------------------------------
-
-    private async check(login: string): Promise<void> {
-        let company = await this.companyCheck();
-        let key = await this.addKeyIfNeed(company.hlfUid);
-
-        let openId = await this.addOpenIdUserIfNeed(login);
-        await this.addUserIfNeed(openId.id, login, company.id, openId.email);
-
-        await this.changeKeyIfNeed(company.hlfUid, key);
-        this.log('Genesis completed');
-        process.exit();
-    }
 
     private async companyCheck(): Promise<CompanyEntity> {
         let item = await this.database.companyGet(Variables.seed.user.uid, false);
@@ -99,7 +89,7 @@ export class GenesisService extends TransportHttp<IKeycloakAdministratorSettings
         return item;
     }
 
-    private async addOpenIdUserIfNeed(login: string): Promise<IOpenIdUser> {
+    private async addOpenIdUserIfNeed(login: string, company: Company): Promise<IOpenIdUser> {
         let item = await this.getUser(login);
         if (!_.isNil(item)) {
             this.log(`OpenId user "${login}" exists`);
@@ -107,12 +97,28 @@ export class GenesisService extends TransportHttp<IKeycloakAdministratorSettings
         }
 
         let headers = { 'Content-Type': 'application/json' };
+        let attributes = { company: JSON.stringify({ id: company.id, status: company.status }) };
         let requiredActions = ['CONFIGURE_TOTP', 'UPDATE_PASSWORD', 'VERIFY_EMAIL'];
         await this.call(`admin/realms/${this.settings.realm}/users`, {
-            data: JSON.stringify({ enabled: true, email: login, username: login }),
-            method: 'post',
-            headers
+            data: {
+                enabled: true,
+                email: login,
+                username: login,
+                firstName: login,
+                lastName: login,
+                credentials: [
+                    {
+                        type: 'password',
+                        value: login,
+                        temporary: true
+                    }
+                ],
+                requiredActions,
+                attributes,
+            },
+            method: 'post'
         });
+        /*
         this.warn(`OpenId user "${login}" added`);
         item = await this.getUser(login);
         await this.call(`admin/realms/${this.settings.realm}/users/${item.id}/reset-password`, {
@@ -120,6 +126,7 @@ export class GenesisService extends TransportHttp<IKeycloakAdministratorSettings
             method: 'put',
             headers
         });
+        /*
         this.warn(`User "${login}" password reset, temporary password is "${login}"`);
         await this.call(`admin/realms/${this.settings.realm}/users/${item.id}`, {
             data: JSON.stringify({ requiredActions }),
@@ -127,7 +134,14 @@ export class GenesisService extends TransportHttp<IKeycloakAdministratorSettings
             headers
         });
         this.warn(`User "${login}" required actions "${requiredActions.join(',')}"`);
-        return item;
+
+        await this.call(`admin/realms/${this.settings.realm}/users/${item.id}`, {
+            data: { email: item.email, attributes },
+            method: 'put',
+            headers
+        });
+        this.warn(`User "${login}" attributes company "${attributes}"`);
+        */
     }
 
     // --------------------------------------------------------------------------
@@ -150,23 +164,15 @@ export class GenesisService extends TransportHttp<IKeycloakAdministratorSettings
     // --------------------------------------------------------------------------
 
     public async initialize(login: string): Promise<void> {
-        try {
-            let { access_token } = await this.call('realms/master/protocol/openid-connect/token', {
-                data: new URLSearchParams({
-                    username: this.settings.userName,
-                    password: this.settings.userPassword,
-                    grant_type: 'password',
-                    client_id: 'admin-cli'
-                }),
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                method: 'post'
-            });
-            this.headers.Authorization = `Bearer ${access_token}`;
-        }
-        catch (error) {
-            throw new ExtendedError(`Unable to get keycloak admin token: ${error.message}`)
-        }
-        await this.check(login);
+        let company = await this.companyCheck();
+        let key = await this.addKeyIfNeed(company.hlfUid);
+
+        let openId = await this.addOpenIdUserIfNeed(login, company);
+        await this.addUserIfNeed(openId.id, login, company.id, openId.email);
+
+        await this.changeKeyIfNeed(company.hlfUid, key);
+        this.log('Genesis completed');
+        process.exit();
     }
 }
 

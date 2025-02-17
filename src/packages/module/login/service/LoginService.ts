@@ -44,7 +44,7 @@ export class LoginService extends LoggerWrapper {
 
     public async login(params: ILoginDto): Promise<ILoginDtoResponse> {
         let item = await this.openId.getTokenByCode({ code: params.data.codeOrToken, redirectUri: params.data.redirectUri });
-        await this.addUserIfNeed(item.access_token);
+        await this.addUserIfNeed(item.access);
         return item;
     }
 }

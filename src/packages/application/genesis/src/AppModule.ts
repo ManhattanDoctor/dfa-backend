@@ -90,6 +90,6 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
         if (this.settings.isTesting) {
             this.warn(`Service works in ${this.settings.mode}: some functions could work different way`);
         }
-        await this.service.initialize(this.settings.keycloakGenesisLogin);
+        await this.service.initialize(this.settings.keycloakLoginGenesis);
     }
 }

@@ -54,7 +54,7 @@ export class KeyListController extends DefaultController<IKeyListDto, IKeyListDt
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private database: DatabaseService) {
+    constructor(logger: Logger) {
         super(logger);
     }
 

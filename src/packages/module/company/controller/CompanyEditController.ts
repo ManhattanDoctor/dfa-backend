@@ -2,7 +2,7 @@ import { Body, Controller, Param, ParseIntPipe, Put, UseGuards } from '@nestjs/c
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { DefaultController } from '@ts-core/backend';
 import { ObjectUtil, Logger } from '@ts-core/common';
-import { IsDefined, MaxLength, ValidateNested, IsEnum, IsOptional, Length, IsNotEmpty, IsString, IsPhoneNumber, IsEmail, IsUrl } from 'class-validator';
+import { IsDefined, MaxLength, ValidateNested, IsEnum, IsOptional, Length, IsString, IsPhoneNumber, IsEmail, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ICompanyEditDto, ICompanyEditDtoResponse } from '@project/common/platform/api/company';
 import { Company, CompanyPreferences, CompanyStatus, COMPANY_PREFERENCES_EMAIL_MAX_LENGTH, COMPANY_PREFERENCES_NAME_MAX_LENGTH, COMPANY_PREFERENCES_NAME_MIN_LENGTH, COMPANY_PREFERENCES_PICTURE_MAX_LENGTH, COMPANY_PREFERENCES_PHONE_MAX_LENGTH, COMPANY_PREFERENCES_WEBSITE_MAX_LENGTH, COMPANY_PREFERENCES_ADDRESS_MAX_LENGTH, COMPANY_PREFERENCES_DESCRIPTION_MAX_LENGTH } from '@project/common/platform/company';
@@ -10,11 +10,11 @@ import { COMPANY_URL } from '@project/common/platform/api';
 import { Swagger } from '@project/module/swagger';
 import { DatabaseService } from '@project/module/database/service';
 import { Transform } from 'class-transformer';
-import { OpenIdBearer, OpenIdResource, OpenIdResourceScope } from '@ts-core/backend-nestjs-openid';
-import { IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
+import { OpenIdBearer } from '@ts-core/backend-nestjs-openid';
+import { IOpenIdBearer, OpenIdGuard, OpenIdResourcePermission } from '@project/module/openid';
 import { ParseUtil } from '@project/module/util';
-import { getResourceValidationOptions, ResourcePermission, CompanyNotFoundError, Resource, ResourceScope } from '@project/common/platform';
-import { TRANSFORM_ADMINISTRATOR, TRANSFORM_SINGLE } from '@project/module/core';
+import { ResourcePermission, CompanyNotFoundError } from '@project/common/platform';
+import { TRANSFORM_SINGLE } from '@project/module/core';
 import { OpenIdService } from '@ts-core/openid-common';
 import * as _ from 'lodash';
 
@@ -122,8 +122,7 @@ export class CompanyEditController extends DefaultController<ICompanyEditDto, IC
 
     @Swagger({ name: 'Company edit', response: Company })
     @Put()
-    @OpenIdResource(Resource.COMPANY)
-    @OpenIdResourceScope(ResourceScope.EDIT)
+    @OpenIdResourcePermission(ResourcePermission.COMPANY_EDIT)
     @UseGuards(OpenIdGuard)
     public async executeExtended(@Param('id', ParseIntPipe) id: number, @Body() params: CompanyEditDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<ICompanyEditDtoResponse> {
         let item = await this.database.companyGet(id, true);
@@ -138,6 +137,6 @@ export class CompanyEditController extends DefaultController<ICompanyEditDto, IC
         }
         await item.save();
 
-        return item.toObject({ groups: id === bearer.user.companyId ? TRANSFORM_SINGLE : TRANSFORM_ADMINISTRATOR });
+        return item.toObject({ groups: TRANSFORM_SINGLE });
     }
 }

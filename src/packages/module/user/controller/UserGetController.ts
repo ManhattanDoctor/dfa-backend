@@ -38,8 +38,8 @@ export class UserGetController extends DefaultController<number, IUserGetDtoResp
     // --------------------------------------------------------------------------
 
     private async validate(id: string, bearer: IOpenIdBearer): Promise<void> {
-        if (id !== bearer.user.id) {
-            await this.openId.validateResource(bearer.token, getResourceValidationOptions(ResourcePermission.USER_READ));
+        if (id !== bearer.token.content.sub) {
+            await this.openId.validateResource(bearer.token.value, getResourceValidationOptions(ResourcePermission.USER_READ));
         }
     }
 
@@ -59,6 +59,6 @@ export class UserGetController extends DefaultController<number, IUserGetDtoResp
         if (_.isNil(item)) {
             throw new UserNotFoundError();
         }
-        return item.toObject({ groups: id === bearer.user.id ? TRANSFORM_SINGLE : TRANSFORM_ADMINISTRATOR });
+        return item.toObject({ groups: TRANSFORM_SINGLE });
     }
 }

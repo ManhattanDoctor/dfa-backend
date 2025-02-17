@@ -69,16 +69,18 @@ export class AppSettings extends EnvSettingsStorage implements IDatabaseSettings
     //
     // --------------------------------------------------------------------------
 
-    public get keycloakGenesisLogin(): string {
-        return this.getValue('KEYCLOAK_GENESIS_LOGIN')
+    public get keycloakLoginGenesis(): string {
+        return this.getValue('KEYCLOAK_LOGIN_GENESIS')
     }
 
     public get keycloak(): IKeycloakAdministratorSettings {
         return {
             url: this.getValue('KEYCLOAK_URL'),
             realm: this.getValue('KEYCLOAK_REALM'),
-            userName: this.getValue('KEYCLOAK_ADMINISTRATOR_NAME'),
-            userPassword: this.getValue('KEYCLOAK_ADMINISTRATOR_PASSWORD'),
+            login: this.getValue('KEYCLOAK_LOGIN'),
+            password: this.getValue('KEYCLOAK_PASSWORD'),
+            clientId: this.getValue('KEYCLOAK_CLIENT_ID'),
+            clientSecret: this.getValue('KEYCLOAK_CLIENT_SECRET'),
         }
     }
 }

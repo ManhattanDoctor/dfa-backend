@@ -14,7 +14,7 @@ import { OpenIdBearer } from '@ts-core/backend-nestjs-openid';
 import { IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
 import { ParseUtil } from '@project/module/util';
 import { getResourceValidationOptions, ResourcePermission, UserNotFoundError } from '@project/common/platform';
-import { TRANSFORM_ADMINISTRATOR, TRANSFORM_SINGLE } from '@project/module/core';
+import { TRANSFORM_SINGLE } from '@project/module/core';
 import { OpenIdService } from '@ts-core/openid-common';
 import * as _ from 'lodash';
 
@@ -103,8 +103,8 @@ export class UserEditController extends DefaultController<IUserEditDto, IUserEdi
     // --------------------------------------------------------------------------
 
     private async validate(id: string, params: IUserEditDto, bearer: IOpenIdBearer): Promise<void> {
-        if (id !== bearer.user.id || !_.isNil(params.status)) {
-            await this.openId.validateResource(bearer.token, getResourceValidationOptions(ResourcePermission.USER_EDIT));
+        if (id !== bearer.token.content.sub || !_.isNil(params.status)) {
+            await this.openId.validateResource(bearer.token.value, getResourceValidationOptions(ResourcePermission.USER_EDIT));
         }
     }
 
@@ -137,6 +137,6 @@ export class UserEditController extends DefaultController<IUserEditDto, IUserEdi
         }
         await item.save();
 
-        return item.toObject({ groups: id === bearer.user.id ? TRANSFORM_SINGLE : TRANSFORM_ADMINISTRATOR });
+        return item.toObject({ groups: TRANSFORM_SINGLE });
     }
 }

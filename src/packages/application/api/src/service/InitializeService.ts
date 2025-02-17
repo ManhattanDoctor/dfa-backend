@@ -5,6 +5,9 @@ import { HlfService } from '@project/module/hlf/service';
 import { LedgerBlockParseCommand } from '@hlf-explorer/monitor';
 import * as _ from 'lodash';
 import { AppSettings } from '../AppSettings';
+import { KeycloakAdministratorTransport } from './KeycloakAdminTransport';
+import { KeycloakTokenManager } from '@ts-core/openid-common';
+
 
 @Injectable()
 export class InitializeService extends LoggerWrapper {
@@ -39,7 +42,23 @@ export class InitializeService extends LoggerWrapper {
     // --------------------------------------------------------------------------
 
     public async initialize(): Promise<void> {
-        await this.hlf.initialize();
+        // await this.hlf.initialize();
+
+        /*
+        let item = new KeycloakAdministratorTransport(this.logger, {
+            url: 'http://localhost:8080',
+            realm: 'dfa',
+            login: 'admin@admin.ru',
+            password: '123',
+            clientId: 'platform',
+            clientSecret: 'lDfg6Unge3lpR9xJVuZIgfCZd3ArsXlr'
+        });
+        item.token = new KeycloakTokenManager();
+
+        let items = await item.call(`admin/realms/dfa/users`);
+        console.log(items);
+        await item.userAttributesSet('renat.gubaev@mail.ru', { company: JSON.stringify({ id: 123, status: 'passed' }), kys: JSON.stringify({ status: 'not_passed' }) });
+        */
 
         // console.log(await api.sendListen(new UserAddCommand({ cryptoKey: Variables.seed.cryptoKey, roles: [UserRole.COIN_MANAGER] })));
         /*
