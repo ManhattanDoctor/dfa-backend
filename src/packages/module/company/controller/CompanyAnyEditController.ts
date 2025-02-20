@@ -1,19 +1,17 @@
-import { Body, Controller, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, ParseIntPipe, Put, UseGuards } from '@nestjs/common';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { DefaultController } from '@ts-core/backend';
 import { Logger, Transport } from '@ts-core/common';
-import { IsDefined, MaxLength, ValidateNested, IsOptional, Length, IsString, IsPhoneNumber, IsEmail, IsUrl } from 'class-validator';
+import { IsDefined, MaxLength, ValidateNested, IsEnum, IsOptional, Length, IsString, IsPhoneNumber, IsEmail, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ICompanyEditDto, ICompanyEditDtoResponse } from '@project/common/platform/api/company';
-import { Company, CompanyPreferences, COMPANY_PREFERENCES_EMAIL_MAX_LENGTH, COMPANY_PREFERENCES_NAME_MAX_LENGTH, COMPANY_PREFERENCES_NAME_MIN_LENGTH, COMPANY_PREFERENCES_PICTURE_MAX_LENGTH, COMPANY_PREFERENCES_PHONE_MAX_LENGTH, COMPANY_PREFERENCES_WEBSITE_MAX_LENGTH, COMPANY_PREFERENCES_ADDRESS_MAX_LENGTH, COMPANY_PREFERENCES_DESCRIPTION_MAX_LENGTH, CompanyUtil, CompanyTaxDetails } from '@project/common/platform/company';
+import { Company, CompanyPreferences, CompanyStatus, COMPANY_PREFERENCES_EMAIL_MAX_LENGTH, COMPANY_PREFERENCES_NAME_MAX_LENGTH, COMPANY_PREFERENCES_NAME_MIN_LENGTH, COMPANY_PREFERENCES_PICTURE_MAX_LENGTH, COMPANY_PREFERENCES_PHONE_MAX_LENGTH, COMPANY_PREFERENCES_WEBSITE_MAX_LENGTH, COMPANY_PREFERENCES_ADDRESS_MAX_LENGTH, COMPANY_PREFERENCES_DESCRIPTION_MAX_LENGTH } from '@project/common/platform/company';
 import { COMPANY_URL } from '@project/common/platform/api';
 import { Swagger } from '@project/module/swagger';
 import { Transform } from 'class-transformer';
-import { OpenIdGetUserInfo } from '@ts-core/backend-nestjs-openid';
 import { OpenIdBearer, IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
 import { ParseUtil } from '@project/module/util';
 import { CompanyEditCommand } from '../transport';
-import { KeycloakService } from '@ts-core/openid-common';
 import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
@@ -73,12 +71,12 @@ class CompanyPreferencesDto implements Partial<CompanyPreferences> {
 export class CompanyEditDto implements ICompanyEditDto {
     @ApiPropertyOptional()
     @IsOptional()
-    @Type(() => CompanyTaxDetails)
-    @ValidateNested()
-    public details?: CompanyTaxDetails;
+    @IsEnum(CompanyStatus)
+    public status?: CompanyStatus;
 
     @ApiPropertyOptional()
     @IsOptional()
+    @IsDefined()
     @Type(() => CompanyPreferencesDto)
     @ValidateNested()
     public preferences?: CompanyPreferencesDto;
@@ -89,7 +87,7 @@ export class CompanyEditDto implements ICompanyEditDto {
     public traceId?: string;
 }
 
-@Controller(COMPANY_URL)
+@Controller(`${COMPANY_URL}/:id`)
 export class CompanyEditController extends DefaultController<ICompanyEditDto, ICompanyEditDtoResponse> {
     // --------------------------------------------------------------------------
     //
@@ -97,7 +95,7 @@ export class CompanyEditController extends DefaultController<ICompanyEditDto, IC
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private transport: Transport, private openId: KeycloakService) {
+    constructor(logger: Logger, private transport: Transport) {
         super(logger);
     }
 
@@ -109,10 +107,9 @@ export class CompanyEditController extends DefaultController<ICompanyEditDto, IC
 
     @Swagger({ name: 'Company edit', response: Company })
     @Put()
-    @OpenIdGetUserInfo()
+    // @OpenIdResourcePermission(ResourcePermission.COMPANY_EDIT)
     @UseGuards(OpenIdGuard)
-    public async executeExtended(@Body() params: CompanyEditDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<Company> {
-        CompanyUtil.isCanEdit(bearer.company, await this.openId.getResources(bearer.token.value), true);
-        return this.transport.sendListen(new CompanyEditCommand({ id: bearer.company.id, details: params.details, preferences: params.preferences }));
+    public async executeExtended(@Param('id', ParseIntPipe) id: number, @Body() params: CompanyEditDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<ICompanyEditDtoResponse> {
+        return this.transport.sendListen(new CompanyEditCommand(Object.assign(params, { id })));
     }
 }

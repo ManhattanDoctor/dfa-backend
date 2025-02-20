@@ -5,8 +5,8 @@ import { IOpenIdBearer, OpenIdBearer, OpenIdGuard, OpenIdOfflineValidation } fro
 import { KeyService } from '../service';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
-import * as _ from 'lodash';
 import { Swagger } from '@project/module/swagger';
+import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
 //

@@ -1,11 +1,11 @@
 import { WebSocketGateway } from '@nestjs/websockets';
 import { Logger } from '@ts-core/common';
-import { Socket } from 'socket.io';
 import { SOCKET_NAMESPACE } from '@project/common/platform/api'
 import { TransportSocketServer as CoreTransportSocketServer } from '@ts-core/socket-server';
 import { TransportSocketUserId } from '@ts-core/socket-common';
-import { RequestInvalidError } from '@project/module/core/middleware';
-import { DatabaseService } from '@project/module/database/service';
+import { OpenIdService, OpenIdTokenUndefinedError } from '@ts-core/openid-common';
+import { Socket } from 'socket.io';
+import { OpenIdGuard } from '@project/module/openid';
 import * as _ from 'lodash';
 
 @WebSocketGateway({ namespace: SOCKET_NAMESPACE, cors: true })
@@ -17,7 +17,7 @@ export class TransportSocketServer extends CoreTransportSocketServer {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private database: DatabaseService) {
+    constructor(logger: Logger, private openId: OpenIdService) {
         super(logger);
     }
 
@@ -29,11 +29,15 @@ export class TransportSocketServer extends CoreTransportSocketServer {
 
     protected async getClientUserId(client: Socket): Promise<TransportSocketUserId> {
         let auth = client.handshake.auth;
-        if (_.isNil(auth) || _.isNil(auth.token)) {
-            throw new RequestInvalidError({ name: 'auth.token', value: auth.token, expected: 'not nil' });
+        if (_.isNil(auth)) {
+            throw new OpenIdTokenUndefinedError();
         }
-        // let { id } = await UserGuard.verifyToken(this.database, auth.token, false);
-        // return id;
-        return null;
+        let { token } = auth;
+        if (_.isNil(token)) {
+            throw new OpenIdTokenUndefinedError();
+        }
+        await this.openId.validateToken(token, {});
+        let { id } = client['token'] = OpenIdGuard.getToken(token);
+        return id;
     }
 }

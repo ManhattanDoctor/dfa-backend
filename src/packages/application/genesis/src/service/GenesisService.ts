@@ -14,6 +14,7 @@ import { LedgerApiClient } from '@hlf-explorer/common';
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
 import { IHlfSettings } from '@project/common/platform/settings';
 import { Company } from '@project/common/platform/company';
+import { IOpenIdAttributes } from '@project/module/openid/lib';
 import * as _ from 'lodash';
 
 export class GenesisService extends KeycloakAdministratorTransport {
@@ -75,14 +76,15 @@ export class GenesisService extends KeycloakAdministratorTransport {
         return item;
     }
 
-    private async addUserIfNeed(id: string, login: string, companyId: number, email?: string): Promise<UserEntity> {
+    private async addUserIfNeed(login: string, openId: IOpenIdUser, company: Company): Promise<UserEntity> {
         let item = await this.database.userGet(login, false);
         if (!_.isNil(item)) {
             this.log(`User "${login}" exists`);
             return item;
         }
-        item = UserEntity.createEntity({ id, login, status: UserStatus.ACTIVE, companyId });
-        item.preferences = UserPreferencesEntity.createEntity({ name: login, picture: ImageUtil.getUser(id), email });
+
+        item = UserEntity.createEntity({ id: openId.id, login, status: UserStatus.ACTIVE, companyId: company.id });
+        item.preferences = UserPreferencesEntity.createEntity({ name: login, picture: ImageUtil.getUser(item.id), email: openId.email });
         await item.save();
         this.warn(`User "${login}" added`);
 
@@ -93,14 +95,18 @@ export class GenesisService extends KeycloakAdministratorTransport {
         let enabled = true;
         let lastName = login;
         let firstName = login;
-        let attributes = { company: JSON.stringify({ id: company.id, status: company.status }) };
+        let attributes: IOpenIdAttributes = { company: { id: company.id } };
         let credentials = [{ type: 'password', value: 'password', temporary: true }];
         let emailVerified = false;
         let requiredActions = ['CONFIGURE_TOTP', 'UPDATE_PASSWORD', 'VERIFY_EMAIL'];
 
+        credentials = [{ type: 'password', value: '123', temporary: false }];
+        emailVerified = true;
+        requiredActions = [];
+
         let item = await this.getUser(login);
         if (_.isNil(item)) {
-            item = await this.call(`admin/realms/${this.settings.realm}/users`, {
+            await this.call(`admin/realms/${this.settings.realm}/users`, {
                 data: {
                     email: login,
                     username: login,
@@ -133,7 +139,7 @@ export class GenesisService extends KeycloakAdministratorTransport {
             });
             this.log(`OpenId user "${login}" updated`);
         }
-        return item;
+        return this.getUser(login);
 
         /*
         let headers = { 'Content-Type': 'application/json' };
@@ -186,7 +192,7 @@ export class GenesisService extends KeycloakAdministratorTransport {
         await this.changeKeyIfNeed(company.hlfUid, key);
 
         let openId = await this.addOpenIdUserIfNeed(login, company);
-        await this.addUserIfNeed(openId.id, login, company.id, openId.email);
+        await this.addUserIfNeed(login, openId, company);
 
         this.log('Genesis completed');
         process.exit();

@@ -28,11 +28,11 @@
         "@project/module": "file:./src/packages/module",
         "@ts-core/backend-nestjs": "~10.0.6",
         "@ts-core/backend-nestjs-language": "~10.0.2",
-        "@ts-core/backend-nestjs-openid": "~10.1.14",
+        "@ts-core/backend-nestjs-openid": "~10.1.16",
         "@ts-core/crypto-gost": "~3.0.7",
         "@ts-core/crypto-rsa": "~3.0.4",
-        "@ts-core/openid-common": "~1.0.24",
-        "@ts-core/socket-server": "~3.0.19",
+        "@ts-core/openid-common": "~1.0.26",
+        "@ts-core/socket-server": "~3.0.24",
         "@types/request-ip": "^0.0.41",
         "jwk-to-pem": "^2.0.7"
     }

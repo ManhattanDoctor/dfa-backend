@@ -9,7 +9,7 @@ export class KeyAddCommand extends TransportCommandAsync<IKeyAddDto, Key> {
     //
     // --------------------------------------------------------------------------
 
-    public static readonly NAME = 'KEY_ADD';
+    public static readonly NAME = 'KeyAddCommand';
 
     // --------------------------------------------------------------------------
     //

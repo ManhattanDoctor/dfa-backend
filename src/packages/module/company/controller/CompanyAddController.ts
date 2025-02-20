@@ -5,18 +5,18 @@ import { Transport, Logger } from '@ts-core/common';
 import { Transform, Type } from 'class-transformer';
 import { IsDefined, ValidateNested, IsOptional, IsString, Length, IsPhoneNumber, MaxLength, IsEmail, IsUrl } from 'class-validator';
 import { Swagger } from '@project/module/swagger';
-import { DatabaseService } from '@project/module/database/service';
 import { COMPANY_URL } from '@project/common/platform/api';
 import { ICompanyAddDto, ICompanyAddDtoResponse } from '@project/common/platform/api/company';
 import { Company, CompanyPreferences, CompanyStatus, COMPANY_PREFERENCES_NAME_MIN_LENGTH, COMPANY_PREFERENCES_NAME_MAX_LENGTH, COMPANY_PREFERENCES_PHONE_MAX_LENGTH, COMPANY_PREFERENCES_EMAIL_MAX_LENGTH, COMPANY_PREFERENCES_PICTURE_MAX_LENGTH, COMPANY_PREFERENCES_WEBSITE_MAX_LENGTH, COMPANY_PREFERENCES_ADDRESS_MAX_LENGTH, COMPANY_PREFERENCES_DESCRIPTION_MAX_LENGTH, CompanyTaxDetails } from '@project/common/platform/company';
 import { CompanyEntity, CompanyPreferencesEntity } from '@project/module/database/company';
 import { ParseUtil } from '@project/module/util';
-import { IOpenIdBearer, OpenIdGuard, OpenIdResourcePermission } from '@project/module/openid';
-import { OpenIdBearer } from '@ts-core/backend-nestjs-openid';
-import { ResourcePermission } from '@project/common/platform';
+import { OpenIdBearer, IOpenIdBearer, OpenIdGuard, OpenIdResourcePermission } from '@project/module/openid';
+import { getSocketUserRoom, ResourcePermission } from '@project/common/platform';
 import { TRANSFORM_SINGLE } from '@project/module/core';
+import { TransportSocket } from '@ts-core/socket-server';
+import { CompanyAddedEvent } from '@project/common/platform/transport';
+import { UserEditCommand } from '@project/module/user/transport';
 import * as _ from 'lodash';
-import { UserEntity } from '@project/module/database/user';
 
 // --------------------------------------------------------------------------
 //
@@ -98,7 +98,7 @@ export class CompanyAddController extends DefaultController<ICompanyAddDto, ICom
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private transport: Transport, private database: DatabaseService) {
+    constructor(logger: Logger, private transport: Transport, private socket: TransportSocket) {
         super(logger);
     }
 
@@ -116,11 +116,19 @@ export class CompanyAddController extends DefaultController<ICompanyAddDto, ICom
         let item = CompanyEntity.createEntity({ status: CompanyStatus.DRAFT });
         item.details = params.details;
         item.preferences = CompanyPreferencesEntity.createEntity(params.preferences);
+        await item.save();
 
+        /*
         await this.database.source.transaction(async manager => {
             await manager.getRepository(CompanyEntity).save(item);
-            await manager.getRepository(UserEntity).update({ companyId: item.id }, { id: bearer.token.content.sub });
+            await manager.getRepository(UserEntity).update({ companyId: item.id }, { id: bearer.token.id });
         });
-        return item.toObject({ groups: TRANSFORM_SINGLE });
+        */
+
+        let company = item.toObject({ groups: TRANSFORM_SINGLE });
+        this.socket.dispatch(new CompanyAddedEvent(company), { room: getSocketUserRoom(bearer.token.id) });
+        await this.transport.sendListen(new UserEditCommand({ id: bearer.token.id, companyId: company.id }));
+
+        return company;
     }
 }

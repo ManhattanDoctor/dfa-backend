@@ -8,8 +8,8 @@ import { Column, OneToMany, CreateDateColumn, Entity, Index, OneToOne, PrimaryGe
 import { UserEntity } from '../user';
 import { CompanyPreferencesEntity } from './CompanyPreferencesEntity';
 import { UserUtil } from '@hlf-core/common';
+import { TRANSFORM_SINGLE } from '@project/module/core';
 import * as _ from 'lodash';
-import { TRANSFORM_PRIVATE, TRANSFORM_SINGLE } from '@project/module/core';
 
 @Entity({ name: 'company' })
 export class CompanyEntity extends TypeormValidableEntity implements Company {

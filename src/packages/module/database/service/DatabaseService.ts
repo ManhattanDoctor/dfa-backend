@@ -72,7 +72,7 @@ export class DatabaseService extends LoggerWrapper {
             query.where(`company.hlfUid  = :hlfUid`, { hlfUid: idOrHlfUid });
         }
         else {
-            throw new CompanyNotFoundError();
+            throw new CompanyNotFoundError(idOrHlfUid);
         }
         if (isNeedRelations) {
             this.companyAddRelations(query);

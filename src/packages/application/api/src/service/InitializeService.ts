@@ -1,14 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Logger, Transport, LoggerWrapper, TransportCryptoManagerEd25519, MathUtil } from '@ts-core/common';
+import { Logger, Transport, LoggerWrapper } from '@ts-core/common';
 import { TransportSocket } from '@ts-core/socket-server';
 import { HlfService } from '@project/module/hlf/service';
-import { LedgerBlockParseCommand } from '@hlf-explorer/monitor';
 import * as _ from 'lodash';
 import { AppSettings } from '../AppSettings';
-import { KeycloakAdministratorTransport } from './KeycloakAdminTransport';
-import { KeycloakTokenManager } from '@ts-core/openid-common';
-import { OpenIdSynchronizeCommand, OpenIdUpdateCommand } from '@project/module/openid/transport';
-import { CompanyStatus } from '@project/common/platform/company';
 
 
 @Injectable()
@@ -18,7 +13,6 @@ export class InitializeService extends LoggerWrapper {
     //  Properties
     //
     // --------------------------------------------------------------------------
-
 
 
     // --------------------------------------------------------------------------
@@ -46,7 +40,8 @@ export class InitializeService extends LoggerWrapper {
     public async initialize(): Promise<void> {
         // await this.hlf.initialize();
 
-        console.log(await this.transport.sendListen(new OpenIdSynchronizeCommand('renat.gubaev@mail.ru')));
+        // console.log(await CompanyEntity.find());
+
         /*
         let item = new KeycloakAdministratorTransport(this.logger, {
             url: 'http://localhost:8080',

@@ -1,7 +1,7 @@
 import { Body, Controller, Param, Put, UseGuards } from '@nestjs/common';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { DefaultController } from '@ts-core/backend';
-import { ObjectUtil, Logger } from '@ts-core/common';
+import { Logger, Transport } from '@ts-core/common';
 import { IsDefined, MaxLength, ValidateNested, IsEnum, IsOptional, Length, IsNotEmpty, IsString, IsPhoneNumber, IsEmail, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IUserEditDto, IUserEditDtoResponse } from '@project/common/platform/api/user';
@@ -10,12 +10,12 @@ import { USER_URL } from '@project/common/platform/api';
 import { Swagger } from '@project/module/swagger';
 import { DatabaseService } from '@project/module/database/service';
 import { Transform } from 'class-transformer';
-import { OpenIdBearer } from '@ts-core/backend-nestjs-openid';
-import { IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
+import { OpenIdBearer, IOpenIdBearer, OpenIdGuard, Token } from '@project/module/openid';
 import { ParseUtil } from '@project/module/util';
-import { getResourceValidationOptions, ResourcePermission, UserNotFoundError } from '@project/common/platform';
-import { TRANSFORM_SINGLE } from '@project/module/core';
+import { getResourceValidationOptions, ResourcePermission } from '@project/common/platform';
 import { OpenIdService } from '@ts-core/openid-common';
+import { TransportSocket } from '@ts-core/socket-server';
+import { UserEditCommand } from '../transport';
 import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
@@ -92,7 +92,7 @@ export class UserEditController extends DefaultController<IUserEditDto, IUserEdi
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private database: DatabaseService, private openId: OpenIdService) {
+    constructor(logger: Logger, private transport: Transport, private socket: TransportSocket, private database: DatabaseService, private openId: OpenIdService) {
         super(logger);
     }
 
@@ -102,15 +102,11 @@ export class UserEditController extends DefaultController<IUserEditDto, IUserEdi
     //
     // --------------------------------------------------------------------------
 
-    private async validate(id: string, params: IUserEditDto, bearer: IOpenIdBearer): Promise<void> {
-        if (id === bearer.token.content.sub && _.isNil(params.status)) {
+    private async validate(id: string, params: IUserEditDto, token: Token): Promise<void> {
+        if (id === token.id && _.isNil(params.status)) {
             return;
         }
-        await this.openId.validateResource(bearer.token.value, getResourceValidationOptions(ResourcePermission.USER_EDIT));
-    }
-
-    private copyPartial<U>(from: Partial<U>, to: U): any {
-        ObjectUtil.copyPartial(from, to, null, ObjectUtil.keys(from).filter(key => _.isUndefined(from[key])));
+        await this.openId.validateResource(token.value, getResourceValidationOptions(ResourcePermission.USER_EDIT));
     }
 
     // --------------------------------------------------------------------------
@@ -123,20 +119,7 @@ export class UserEditController extends DefaultController<IUserEditDto, IUserEdi
     @Put()
     @UseGuards(OpenIdGuard)
     public async executeExtended(@Param('id') id: string, @Body() params: UserEditDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<IUserEditDtoResponse> {
-        await this.validate(id, params, bearer);
-
-        let item = await this.database.userGet(id, true);
-        if (_.isNil(item)) {
-            throw new UserNotFoundError(id);
-        }
-        if (!_.isNil(params.status)) {
-            item.status = params.status;
-        }
-        if (!_.isNil(params.preferences)) {
-            this.copyPartial(params.preferences, item.preferences);
-        }
-        await item.save();
-
-        return item.toObject({ groups: TRANSFORM_SINGLE });
+        await this.validate(id, params, bearer.token);
+        return this.transport.sendListen(new UserEditCommand(Object.assign(params, { id })));
     }
 }

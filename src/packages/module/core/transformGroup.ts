@@ -5,7 +5,7 @@ export enum TransformGroup {
     ADMINISTRATOR = 'ADMINISTRATOR',
 }
 
-export let TRANSFORM_SINGLE = [TransformGroup.PRIVATE, TransformGroup.PUBLIC];
-export let TRANSFORM_PRIVATE = [TransformGroup.PRIVATE];
-export let TRANSFORM_ADMINISTRATOR = [TransformGroup.ADMINISTRATOR, TransformGroup.PRIVATE];
+export const TRANSFORM_SINGLE = [TransformGroup.PRIVATE, TransformGroup.PUBLIC];
+export const TRANSFORM_PRIVATE = [TransformGroup.PRIVATE];
+export const TRANSFORM_ADMINISTRATOR = [TransformGroup.ADMINISTRATOR, TransformGroup.PRIVATE];
 

@@ -19,9 +19,11 @@ export class AddRootObjects1627121260000 implements MigrationInterface {
         if (await repository.existsBy({ hlfUid: Variables.seed.user.uid })) {
             return;
         }
+        
+        let name = 'Platform';
         let item = CompanyEntity.createEntity({ hlfUid: Variables.seed.user.uid, status: CompanyStatus.ACTIVE });
-        item.details = TransformUtil.toClass(CompanyTaxDetails, { inn: '000000000000', founded: new Date(0) })
-        item.preferences = CompanyPreferencesEntity.createEntity({ name: 'Platform company', picture: ImageUtil.getCompany(Variables.seed.user.uid) });
+        item.details = TransformUtil.toClass(CompanyTaxDetails, { inn: '000000000000', founded: new Date(0), name })
+        item.preferences = CompanyPreferencesEntity.createEntity({ picture: ImageUtil.getCompany(Variables.seed.user.uid),name });
         await item.save();
     }
 

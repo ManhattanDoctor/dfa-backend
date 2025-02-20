@@ -1,14 +1,14 @@
 import { TransformUtil, TransportCommandAsync } from '@ts-core/common';
-import { Key } from '@project/common/custody';
+import { User, UserPreferences, UserStatus } from '@project/common/platform/user';
 
-export class KeyGetByOwnerCommand extends TransportCommandAsync<string, Key> {
+export class UserEditCommand extends TransportCommandAsync<IUserEditDto, User> {
     // --------------------------------------------------------------------------
     //
     //  Public Static Properties
     //
     // --------------------------------------------------------------------------
 
-    public static readonly NAME = 'KeyGetByOwnerCommand';
+    public static readonly NAME = 'UserEditCommand';
 
     // --------------------------------------------------------------------------
     //
@@ -16,8 +16,8 @@ export class KeyGetByOwnerCommand extends TransportCommandAsync<string, Key> {
     //
     // --------------------------------------------------------------------------
 
-    constructor(request: string) {
-        super(KeyGetByOwnerCommand.NAME, request);
+    constructor(request: IUserEditDto) {
+        super(UserEditCommand.NAME, request);
     }
 
     // --------------------------------------------------------------------------
@@ -26,7 +26,14 @@ export class KeyGetByOwnerCommand extends TransportCommandAsync<string, Key> {
     //
     // --------------------------------------------------------------------------
 
-    protected checkResponse(value: Key): Key {
-        return TransformUtil.toClass(Key, value);
+    protected checkResponse(value: User): User {
+        return TransformUtil.toClass(User, value);
     }
+}
+
+export interface IUserEditDto {
+    id: string;
+    status?: UserStatus;
+    companyId?: number;
+    preferences?: Partial<UserPreferences>;
 }

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Logger, Transport, TransportCommandAsyncHandler } from '@ts-core/common';
 import { OpenIdSynchronizeCommand } from '../OpenIdSynchronizeCommand';
 import { IOpenIdUser } from '@ts-core/openid-common';
-import { OpenIdAdministratorTransport } from '../../service';
 import { DatabaseService } from '@project/module/database/service';
 import { IOpenIdAttributes } from '../../lib';
 import * as _ from 'lodash';
@@ -35,8 +34,8 @@ export class OpenIdSynchronizeHandler extends TransportCommandAsyncHandler<strin
         let attributes: IOpenIdAttributes = {};
         let { company } = user;
         if (!_.isNil(user.company)) {
-            attributes.company = { id: company.id, status: company.status };
+            attributes.company = { id: company.id };
         }
-        return this.transport.sendListen(new OpenIdUpdateCommand({ login: params, attributes }));
+        return this.transport.sendListen(new OpenIdUpdateCommand({ login: user.login, attributes }));
     }
 }

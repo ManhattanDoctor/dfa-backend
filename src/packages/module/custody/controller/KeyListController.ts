@@ -4,7 +4,6 @@ import { DefaultController } from '@ts-core/backend-nestjs';
 import { TypeormUtil } from '@ts-core/backend';
 import { Logger, FilterableConditions, FilterableSort, Paginable, IPaginable, IPagination, ITraceable } from '@ts-core/common';
 import { IsOptional, IsString } from 'class-validator';
-import { DatabaseService } from '@project/module/database/service';
 import { Key } from '@project/common/custody';
 import { IOpenIdBearer, OpenIdBearer, OpenIdGuard, OpenIdOfflineValidation } from '@ts-core/backend-nestjs-openid';
 import { Swagger } from '@project/module/swagger';

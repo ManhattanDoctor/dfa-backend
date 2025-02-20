@@ -1,7 +1,7 @@
 import { IHlfSettings } from '@project/common/platform/settings';
 import { IDatabaseSettings, IWebSettings, EnvSettingsStorage } from '@ts-core/backend';
 import { IKeycloakAdministratorSettings, IKeycloakSettings } from '@ts-core/openid-common';
-import { AbstractSettingsStorage, ILogger, LoggerLevel, UrlUtil } from '@ts-core/common';
+import { AbstractSettingsStorage, ExtendedError, ILogger, LoggerLevel, UrlUtil } from '@ts-core/common';
 import * as jwk2pem from 'jwk-to-pem';
 import axios from 'axios';
 import * as _ from 'lodash';
@@ -23,8 +23,14 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
 
     public async initialize(): Promise<void> {
         let { url, realm } = this.keycloak;
-        let { data } = await axios.get(`${UrlUtil.parseUrl(url)}realms/${realm}/protocol/openid-connect/certs`);
-        this.data['KEYCLOAK_REALM_PUBLIC_KEY'] = AbstractSettingsStorage.parsePEM(jwk2pem(_.find(data.keys, { use: 'sig' })));
+        try {
+            let { data } = await axios.get(`${UrlUtil.parseUrl(url)}realms/${realm}/protocol/openid-connect/certs`);
+            this.data['KEYCLOAK_REALM_PUBLIC_KEY'] = AbstractSettingsStorage.parsePEM(jwk2pem(_.find(data.keys, { use: 'sig' })));
+        }
+        catch (error) {
+            throw new ExtendedError(`Unable to load keycloak certs: ${error.message}`);
+        }
+
     }
 
     // --------------------------------------------------------------------------
@@ -97,7 +103,7 @@ export class AppSettings extends EnvSettingsStorage implements IWebSettings, IDa
     //
     // --------------------------------------------------------------------------
 
-    public get keycloak(): IKeycloakSettings & IKeycloakAdministratorSettings{
+    public get keycloak(): IKeycloakSettings & IKeycloakAdministratorSettings {
         return {
             url: this.getValue('KEYCLOAK_URL'),
             realm: this.getValue('KEYCLOAK_REALM'),

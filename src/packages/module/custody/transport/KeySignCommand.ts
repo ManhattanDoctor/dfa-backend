@@ -8,7 +8,7 @@ export class KeySignCommand extends TransportCommandAsync<IKeySignDto, string> {
     //
     // --------------------------------------------------------------------------
 
-    public static readonly NAME = 'KEY_SIGN';
+    public static readonly NAME = 'KeySignCommand';
 
     // --------------------------------------------------------------------------
     //

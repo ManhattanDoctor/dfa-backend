@@ -10,7 +10,7 @@ export class OpenIdUpdateCommand extends TransportCommandAsync<IOpenIdUpdateDto,
     //
     // --------------------------------------------------------------------------
 
-    public static readonly NAME = 'OPEN_ID__UPDATE_COMMAND';
+    public static readonly NAME = 'OpenIdUpdateCommand';
 
     // --------------------------------------------------------------------------
     //

@@ -6,11 +6,11 @@ import { Logger } from '@ts-core/common';
 import { Swagger } from '@project/module/swagger';
 import { DatabaseService } from '@project/module/database/service';
 import { ICompanyGetDtoResponse } from '@project/common/platform/api/company';
-import { IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
-import { OpenIdBearer } from '@ts-core/backend-nestjs-openid';
+import { OpenIdGuard, OpenIdResourcePermission, } from '@project/module/openid';
 import { OpenIdService } from '@ts-core/openid-common';
-import { getResourceValidationOptions, ResourcePermission, CompanyNotFoundError } from '@project/common/platform';
-import { TRANSFORM_ADMINISTRATOR, TRANSFORM_SINGLE } from '@project/module/core';
+import { CompanyNotFoundError } from '@project/common/platform';
+import { ResourcePermission } from '@project/common/platform';
+import { TRANSFORM_SINGLE } from '@project/module/core';
 import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
@@ -33,32 +33,18 @@ export class CompanyGetController extends DefaultController<number, ICompanyGetD
 
     // --------------------------------------------------------------------------
     //
-    //  Private Methods
-    //
-    // --------------------------------------------------------------------------
-
-    private async validate(id: number, bearer: IOpenIdBearer): Promise<void> {
-        if (id === bearer.token.content.company?.id) {
-            return;
-        }
-        await this.openId.validateResource(bearer.token.value, getResourceValidationOptions(ResourcePermission.COMPANY_READ));
-    }
-
-    // --------------------------------------------------------------------------
-    //
     //  Public Methods
     //
     // --------------------------------------------------------------------------
 
     @Swagger({ name: 'Get company', response: Company })
     @Get()
+    @OpenIdResourcePermission(ResourcePermission.COMPANY_READ)
     @UseGuards(OpenIdGuard)
-    public async executeExtended(@Param('id', ParseIntPipe) id: number, @OpenIdBearer() bearer: IOpenIdBearer): Promise<ICompanyGetDtoResponse> {
-        await this.validate(id, bearer);
-
+    public async executeExtended(@Param('id', ParseIntPipe) id: number): Promise<ICompanyGetDtoResponse> {
         let item = await this.database.companyGet(id, true);
         if (_.isNil(item)) {
-            throw new CompanyNotFoundError();
+            throw new CompanyNotFoundError(id);
         }
         return item.toObject({ groups: TRANSFORM_SINGLE });
     }

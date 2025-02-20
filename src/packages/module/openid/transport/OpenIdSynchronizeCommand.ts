@@ -8,7 +8,7 @@ export class OpenIdSynchronizeCommand extends TransportCommandAsync<string, IOpe
     //
     // --------------------------------------------------------------------------
 
-    public static readonly NAME = 'OPEN_ID_SYNCHRONIZE_COMMAND';
+    public static readonly NAME = 'OpenIdSynchronizeCommand';
 
     // --------------------------------------------------------------------------
     //
