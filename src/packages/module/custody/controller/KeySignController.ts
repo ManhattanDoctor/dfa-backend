@@ -26,7 +26,7 @@ export class KeySignDto implements IKeySignDto {
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    traceId?: string;
+    public traceId?: string;
 }
 
 // --------------------------------------------------------------------------

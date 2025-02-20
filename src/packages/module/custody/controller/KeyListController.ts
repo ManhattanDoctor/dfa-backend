@@ -22,21 +22,21 @@ export interface IKeyListDtoResponse extends IPagination<Key> { }
 
 class KeyListDto {
     @ApiPropertyOptional()
-    conditions?: FilterableConditions<Key>;
+    public conditions?: FilterableConditions<Key>;
 
     @ApiPropertyOptional()
-    sort?: FilterableSort<Key>;
+    public sort?: FilterableSort<Key>;
 
     @ApiProperty({ default: Paginable.DEFAULT_PAGE_SIZE })
-    pageSize: number;
+    public pageSize: number;
 
     @ApiProperty({ default: Paginable.DEFAULT_PAGE_INDEX })
-    pageIndex: number;
+    public pageIndex: number;
 
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    traceId?: string;
+    public traceId?: string;
 }
 
 // --------------------------------------------------------------------------

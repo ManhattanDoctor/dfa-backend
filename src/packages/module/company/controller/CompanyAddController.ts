@@ -87,7 +87,7 @@ export class CompanyAddDto implements ICompanyAddDto {
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    traceId?: string;
+    public traceId?: string;
 }
 
 @Controller(COMPANY_URL)

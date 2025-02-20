@@ -27,7 +27,7 @@ class KeyAddDto implements IKeyAddDto {
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    traceId?: string;
+    public traceId?: string;
 }
 
 // --------------------------------------------------------------------------
