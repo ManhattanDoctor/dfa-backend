@@ -72,13 +72,13 @@ export class KeyService extends LoggerWrapper {
     }
 
     public async sign(uid: string, message: string): Promise<string> {
-        let item = await this.get(uid);
-        return this.getManager(item.algorithm).sign(message, item.privateKey);
+        let { algorithm, privateKey } = await this.get(uid);
+        return this.getManager(algorithm).sign(message, privateKey);
     }
 
     public async verify(uid: string, message: string, signature: string): Promise<boolean> {
-        let item = await this.get(uid);
-        return this.getManager(item.algorithm).verify(message, signature, item.privateKey);
+        let { algorithm, value } = await this.get(uid);
+        return this.getManager(algorithm).verify(message, signature, value);
     }
 }
 

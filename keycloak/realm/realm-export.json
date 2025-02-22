@@ -897,6 +897,18 @@
                             "scopes": "[\"activate\"]",
                             "applyPolicies": "[\"Company assigned\"]"
                         }
+                    },
+                    {
+                        "name": "company:list",
+                        "description": "",
+                        "type": "scope",
+                        "logic": "POSITIVE",
+                        "decisionStrategy": "AFFIRMATIVE",
+                        "config": {
+                            "resources": "[\"company\"]",
+                            "scopes": "[\"list\"]",
+                            "applyPolicies": "[\"Company not assigned\",\"Platform employee\"]"
+                        }
                     }
                 ],
                 "scopes": [

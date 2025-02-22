@@ -20,7 +20,7 @@ export class HlfService extends LoggerWrapper {
 
     // --------------------------------------------------------------------------
     //
-    //  Other Methods
+    //  Public Methods
     //
     // --------------------------------------------------------------------------
 
@@ -39,5 +39,19 @@ export class HlfService extends LoggerWrapper {
 
     public sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: ITransportCommandOptions, ledgerName?: string): Promise<V> {
         return this.api.ledgerRequestSendListen(command, options, ledgerName);
+    }
+
+    // --------------------------------------------------------------------------
+    //
+    //  Public Properties
+    //
+    // --------------------------------------------------------------------------
+
+    public get userId(): string {
+        return this.api.userId;
+    }
+
+    public set userId(value: string) {
+        this.api.userId = value;
     }
 }

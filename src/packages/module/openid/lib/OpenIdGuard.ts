@@ -3,12 +3,12 @@ import { IKeycloakTokenContent, IKeycloakTokenHeader, KeycloakAccessToken, OpenI
 import { ExecutionContext, Injectable, SetMetadata, createParamDecorator } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { DatabaseService } from '@project/module/database/service';
-import { CompanyStatusInvalidError, CompanyUndefinedError, UserNotFoundError, UserStatusInvalidError } from '@project/common/platform';
+import { CompanyUndefinedError, UserNotFoundError, UserStatusInvalidError, UserUndefinedError } from '@project/common/platform';
 import { UserEntity } from '@project/module/database/user';
 import { IOpenIdAttributes } from './IOpenIdAttributes';
 import { CompanyEntity } from '@project/module/database/company';
 import { Company, CompanyStatus, CompanyUtil } from '@project/common/platform/company';
-import { UserStatus } from '@project/common/platform/user';
+import { User, UserStatus } from '@project/common/platform/user';
 import * as _ from 'lodash';
 
 @Injectable()
@@ -27,6 +27,15 @@ export class OpenIdGuard extends OpenIdGuardBase<IOpenIdBearer, Token, UserEntit
     //  Static Methods
     //
     // --------------------------------------------------------------------------
+
+    public static verifyUser(item: User): void {
+        if (_.isNil(item)) {
+            throw new UserUndefinedError();
+        }
+        if (item.status !== UserStatus.ACTIVE) {
+            throw new UserStatusInvalidError({ expected: UserStatus.ACTIVE, value: item.status });
+        }
+    }
 
     public static companyVerify(company: Company, options: IOpenIdGuardOptions): void {
         if (_.isNil(options) || _.isNil(options.company)) {
@@ -68,13 +77,11 @@ export class OpenIdGuard extends OpenIdGuardBase<IOpenIdBearer, Token, UserEntit
         if (_.isNil(item)) {
             throw new UserNotFoundError(token.id);
         }
-        if (item.status !== UserStatus.ACTIVE) {
-            throw new UserStatusInvalidError({ expected: UserStatus.ACTIVE, value: item.status });
-        }
 
-        let { company } = item;
-        OpenIdGuard.companyVerify(company, this.getOptions(context));
-        bearer.company = company;
+        OpenIdGuard.verifyUser(item);
+        OpenIdGuard.companyVerify(item.company, this.getOptions(context));
+
+        bearer.company = item.company;
         return item;
     }
 

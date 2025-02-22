@@ -7,10 +7,10 @@ import { Company, CompanyStatus, CompanyUtil } from '@project/common/platform/co
 import { OpenIdBearer, IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
 import { OpenIdGetUserInfo } from '@ts-core/backend-nestjs-openid';
 import { CompanyEditCommand } from '../transport';
-import { KeycloakService } from '@ts-core/openid-common';
+import { OpenIdService } from '@ts-core/openid-common';
 import * as _ from 'lodash';
 
-@Controller(`${COMPANY_URL}/Submit`)
+@Controller(`${COMPANY_URL}/submit`)
 export class CompanySubmitController extends DefaultController<void, Company> {
     // --------------------------------------------------------------------------
     //
@@ -18,7 +18,7 @@ export class CompanySubmitController extends DefaultController<void, Company> {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private transport: Transport, private openId: KeycloakService) {
+    constructor(logger: Logger, private transport: Transport, private openId: OpenIdService) {
         super(logger);
     }
 

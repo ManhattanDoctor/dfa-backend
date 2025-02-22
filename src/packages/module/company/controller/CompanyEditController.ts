@@ -13,7 +13,7 @@ import { OpenIdGetUserInfo } from '@ts-core/backend-nestjs-openid';
 import { OpenIdBearer, IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
 import { ParseUtil } from '@project/module/util';
 import { CompanyEditCommand } from '../transport';
-import { KeycloakService } from '@ts-core/openid-common';
+import { OpenIdService } from '@ts-core/openid-common';
 import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
@@ -97,7 +97,7 @@ export class CompanyEditController extends DefaultController<ICompanyEditDto, IC
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private transport: Transport, private openId: KeycloakService) {
+    constructor(logger: Logger, private transport: Transport, private openId: OpenIdService) {
         super(logger);
     }
 

@@ -1,7 +1,9 @@
 import { LedgerApiClient } from '@hlf-explorer/common';
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
-import { ITransportCommand, TransportCommandAsync, ILogger, ClassType, ExtendedError, Transport } from '@ts-core/common';
+import { HlfTransportCommand } from '@hlf-core/common';
+import { ITransportCommand, TransportCommandAsync, ILogger, ClassType, ExtendedError, Transport, TransportCryptoManager, ObjectUtil } from '@ts-core/common';
 import { IHlfSettings } from '@project/common/platform/settings';
+import { KeyTransportCryptoManager } from '@project/module/custody/service';
 import * as _ from 'lodash';
 
 export class HlfApiClient extends LedgerApiClient {
@@ -12,6 +14,7 @@ export class HlfApiClient extends LedgerApiClient {
     // --------------------------------------------------------------------------
 
     public userId: string;
+    private manager: KeyTransportCryptoManager;
 
     // --------------------------------------------------------------------------
     //
@@ -19,8 +22,9 @@ export class HlfApiClient extends LedgerApiClient {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: ILogger, private transport: Transport, settings: IHlfSettings) {
+    constructor(logger: ILogger, settings: IHlfSettings, transport: Transport) {
         super(logger, settings.url, settings.name);
+        this.manager = new KeyTransportCryptoManager(transport);
     }
 
     // --------------------------------------------------------------------------
@@ -29,9 +33,11 @@ export class HlfApiClient extends LedgerApiClient {
     //
     // --------------------------------------------------------------------------
 
-    protected async sign<U>(command: ITransportCommand<U>, options?: ITransportFabricCommandOptions, ledgerName?: string): Promise<void> {
+    protected async sign<U>(command: HlfTransportCommand<U>, options?: ITransportFabricCommandOptions, ledgerName?: string): Promise<void> {
         options.userId = this.userId;
-        // options.signature = await TransportCryptoManager.sign(command, this.manager, { publicKey: this.publicKey, privateKey: this.privateKey });
+        if (!_.isNil(this.userId) && !command.isReadonly) {
+            options.signature = await TransportCryptoManager.sign(command, this.manager, { publicKey: this.userId, privateKey: this.userId });
+        }
     }
 
     // --------------------------------------------------------------------------

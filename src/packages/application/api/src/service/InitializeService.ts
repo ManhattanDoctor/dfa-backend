@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { Logger, Transport, LoggerWrapper } from '@ts-core/common';
+import { Logger, Transport, LoggerWrapper, ISignature, TransportCryptoManager } from '@ts-core/common';
 import { TransportSocket } from '@ts-core/socket-server';
 import { HlfService } from '@project/module/hlf/service';
 import * as _ from 'lodash';
 import { AppSettings } from '../AppSettings';
+import { CompanyEditCommand } from '@project/module/company/transport';
+import { CompanyStatus } from '@project/common/platform/company';
+import { KeyTransportCryptoManager } from '@project/module/custody/service';
+import { UserAddCommand, UserGetCommand } from '@project/common/hlf/transport';
+import { Variables } from '@project/common/hlf';
 
 
 @Injectable()

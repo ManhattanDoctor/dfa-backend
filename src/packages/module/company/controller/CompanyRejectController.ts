@@ -9,7 +9,7 @@ import { IOpenIdBearer, OpenIdBearer, OpenIdGuard } from '@project/module/openid
 import { CompanyEditCommand } from '../transport';
 import { DatabaseService } from '@project/module/database/service';
 import { CompanyNotFoundError } from '@project/common/platform';
-import { KeycloakService } from '@ts-core/openid-common';
+import { OpenIdService } from '@ts-core/openid-common';
 import * as _ from 'lodash';
 
 @Controller(`${COMPANY_URL}/:id/reject`)
@@ -20,7 +20,7 @@ export class CompanyRejectController extends DefaultController<number, Company> 
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private transport: Transport, private openId: KeycloakService, private database: DatabaseService) {
+    constructor(logger: Logger, private transport: Transport, private openId: OpenIdService, private database: DatabaseService) {
         super(logger);
     }
 
@@ -39,6 +39,6 @@ export class CompanyRejectController extends DefaultController<number, Company> 
             throw new CompanyNotFoundError(id);
         }
         CompanyUtil.isCanReject(item, await this.openId.getResources(bearer.token.value), true);
-        return this.transport.sendListen(new CompanyEditCommand({ id: bearer.company.id, status: CompanyStatus.REJECTED }));
+        return this.transport.sendListen(new CompanyEditCommand({ id, status: CompanyStatus.REJECTED }));
     }
 }

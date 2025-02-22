@@ -54,7 +54,8 @@ export class GenesisService extends KeycloakAdministratorTransport {
         return item;
     }
 
-    private async changeKeyIfNeed(uid: string, key: Key): Promise<void> {
+    private async changeKeyIfNeed(company: Company, key: Key): Promise<void> {
+        let uid = company.hlfUid;
         let item = await this.hlf.ledgerRequestSendListen(new UserGetCommand({ uid, details: ['cryptoKey'] }));
         let { cryptoKey } = item;
         if (cryptoKey.value !== Variables.seed.cryptoKey.value) {
@@ -65,7 +66,8 @@ export class GenesisService extends KeycloakAdministratorTransport {
         this.warn(`Hlf company default crypto key changed`);
     }
 
-    private async addKeyIfNeed(owner: string): Promise<Key> {
+    private async addKeyIfNeed(company: Company): Promise<Key> {
+        let owner = company.hlfUid;
         let item = await this.transport.sendListen(new KeyGetByOwnerCommand(owner))
         if (!_.isNil(item)) {
             this.log(`Key for "${owner}" exists`);
@@ -188,8 +190,8 @@ export class GenesisService extends KeycloakAdministratorTransport {
 
     public async initialize(login: string): Promise<void> {
         let company = await this.companyCheck();
-        let key = await this.addKeyIfNeed(company.hlfUid);
-        await this.changeKeyIfNeed(company.hlfUid, key);
+        let key = await this.addKeyIfNeed(company);
+        await this.changeKeyIfNeed(company, key);
 
         let openId = await this.addOpenIdUserIfNeed(login, company);
         await this.addUserIfNeed(login, openId, company);

@@ -1,7 +1,7 @@
 import { DynamicModule } from '@nestjs/common';
 import { OpenIdModule as OpenIdModuleBase, OpenIdType } from '@ts-core/backend-nestjs-openid';
-import { IKeycloakAdministratorSettings, IKeycloakSettings, KeycloakService, OpenIdService } from '@ts-core/openid-common';
-import { OpenIdGetTokenByRefreshTokenController, OpenIdLogoutByRefreshTokenController } from './controller';
+import { IKeycloakAdministratorSettings, IKeycloakSettings } from '@ts-core/openid-common';
+import { OpenIdGetResourcesController, OpenIdGetTokenByRefreshTokenController, OpenIdLogoutByRefreshTokenController } from './controller';
 import { OpenIdGuard } from './lib';
 import { OpenIdSynchronizeHandler, OpenIdUpdateHandler } from './transport/handler';
 import { OpenIdAdministratorTransport } from './service';
@@ -26,16 +26,13 @@ export class OpenIdModule {
                     inject: [Logger],
                     useFactory: (logger) => new OpenIdAdministratorTransport(logger, settings)
                 },
-                {
-                    provide: KeycloakService,
-                    useExisting: OpenIdService
-                },
+
                 OpenIdGuard,
                 OpenIdUpdateHandler,
                 OpenIdSynchronizeHandler
             ],
-            controllers: [OpenIdLogoutByRefreshTokenController, OpenIdGetTokenByRefreshTokenController],
-            exports: [OpenIdGuard, KeycloakService],
+            controllers: [OpenIdLogoutByRefreshTokenController, OpenIdGetTokenByRefreshTokenController, OpenIdGetResourcesController],
+            exports: [OpenIdGuard],
             global: true
         };
     }
