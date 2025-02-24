@@ -3,10 +3,12 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 import { CompanyEntity, CompanyPreferencesEntity } from '@project/module/database/company';
 import { Variables } from '@project/common/hlf';
 import { CompanyStatus, CompanyTaxDetails } from '@project/common/platform/company';
-import { ImageUtil } from '@project/common/platform/util';
+import { CoinBalanceEntity, CoinEntity } from '@project/module/database/coin';
+import { CoinBalance } from '@hlf-core/coin';
+import { CoinStatus } from '@project/common/platform/coin';
 import * as _ from 'lodash';
 
-export class AddRootObjects1627121260000 implements MigrationInterface {
+export class AddObjects1627121260000 implements MigrationInterface {
 
     // --------------------------------------------------------------------------
     //
@@ -19,30 +21,34 @@ export class AddRootObjects1627121260000 implements MigrationInterface {
         if (await repository.existsBy({ hlfUid: Variables.seed.user.uid })) {
             return;
         }
-        
+
         let name = 'Platform';
         let item = CompanyEntity.createEntity({ hlfUid: Variables.seed.user.uid, status: CompanyStatus.ACTIVE });
         item.details = TransformUtil.toClass(CompanyTaxDetails, { inn: '000000000000', founded: new Date(0), name })
-        item.preferences = CompanyPreferencesEntity.createEntity({ picture: ImageUtil.getCompany(Variables.seed.user.uid),name });
+        item.preferences = CompanyPreferencesEntity.createEntity({ name });
         await item.save();
     }
 
     private async coinAdd(runner: QueryRunner): Promise<void> {
-        /*
+        let repository = runner.connection.getRepository(CoinEntity);
+        if (await repository.existsBy({ hlfUid: Variables.seed.coin.uid })) {
+            return;
+        }
+
         let coin = new CoinEntity();
-        coin.uid = AuctionVariable.coin.uid;
+        coin.status = CoinStatus.ACTIVE;
+        coin.hlfUid = Variables.seed.coin.uid;
         coin.balance = CoinBalance.create();
-        coin.balance.inUse = coin.balance.emitted = AuctionVariable.coin.amount;
-        coin = await runner.connection.getRepository(CoinEntity).save(coin);
+        coin.balance.emit(Variables.seed.coin.amount);
+        await repository.save(coin);
 
         let balance = new CoinBalanceEntity();
-        balance.uid = AclVariables.root.uid;
         balance.held = '0';
-        balance.coinUid = coin.uid;
-        balance.inUse = balance.total = AuctionVariable.coin.amount;
+        balance.inUse = balance.total = Variables.seed.coin.amount;
         balance.coinId = coin.id;
-        balance = await runner.connection.getRepository(CoinBalanceEntity).save(balance);
-        */
+        balance.coinUid = coin.hlfUid;
+        balance.ownerUid = Variables.seed.coin.ownerUid;
+        await runner.connection.getRepository(CoinBalanceEntity).save(balance);
     }
 
     // --------------------------------------------------------------------------

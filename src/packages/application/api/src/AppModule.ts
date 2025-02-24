@@ -20,6 +20,7 @@ import { LanguageModule } from '@project/module/language';
 import { TaxModule } from '@project/module/tax';
 import { CustodyModule } from '@project/module/custody';
 import { CompanyModule } from '@project/module/company';
+import { ActionModule } from '@project/module/action';
 
 @Injectable()
 export class AppModule extends ModeApplication<AppSettings> implements OnApplicationBootstrap {
@@ -47,6 +48,7 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
                 UserModule,
                 LoginModule,
                 SocketModule,
+                ActionModule,
                 CustodyModule,
                 CompanyModule,
 

@@ -1,5 +1,5 @@
 import { COMPANY_PREFERENCES_ADDRESS_MAX_LENGTH, COMPANY_PREFERENCES_DESCRIPTION_MAX_LENGTH, COMPANY_PREFERENCES_NAME_MAX_LENGTH, COMPANY_PREFERENCES_NAME_MIN_LENGTH, COMPANY_PREFERENCES_PICTURE_MAX_LENGTH, COMPANY_PREFERENCES_WEBSITE_MAX_LENGTH } from '@project/common/platform/company';
-import { ObjectUtil } from '@ts-core/common';
+import { ObjectUtil, TraceUtil } from '@ts-core/common';
 import { TypeormValidableEntity } from '@ts-core/backend';
 import { Exclude } from 'class-transformer';
 import { IsEmail, Length, MaxLength, IsNumber, IsOptional, IsPhoneNumber } from 'class-validator';
@@ -7,6 +7,7 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'ty
 import { CompanyPreferences } from '@project/common/platform/company';
 import { CompanyEntity } from './CompanyEntity';
 import * as _ from 'lodash';
+import { ImageUtil } from '@project/common/platform/util';
 
 @Entity({ name: 'company_preferences' })
 export class CompanyPreferencesEntity extends TypeormValidableEntity implements CompanyPreferences {
@@ -17,6 +18,9 @@ export class CompanyPreferencesEntity extends TypeormValidableEntity implements 
     // --------------------------------------------------------------------------
 
     public static createEntity(preferences: Partial<CompanyPreferences>): CompanyPreferencesEntity {
+        if (_.isNil(preferences.picture)) {
+            preferences.picture = ImageUtil.getCompany(TraceUtil.generate());
+        }
         let item = new CompanyPreferencesEntity();
         ObjectUtil.copyPartial(preferences, item);
         return item;

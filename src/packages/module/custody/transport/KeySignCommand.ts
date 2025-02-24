@@ -1,7 +1,7 @@
-import { TransformUtil, TransportCommandAsync } from '@ts-core/common';
-import { IsString } from 'class-validator';
+import { ISignature, TransformUtil, TransportCommandAsync } from '@ts-core/common';
+import { IsOptional, IsString } from 'class-validator';
 
-export class KeySignCommand extends TransportCommandAsync<IKeySignDto, string> {
+export class KeySignCommand extends TransportCommandAsync<IKeySignDto, ISignature> {
     // --------------------------------------------------------------------------
     //
     //  Public Static Properties
@@ -24,6 +24,7 @@ export class KeySignCommand extends TransportCommandAsync<IKeySignDto, string> {
 export interface IKeySignDto {
     uid: string;
     message: string;
+    nonce?: string;
 }
 
 export class KeySignDto implements IKeySignDto {
@@ -32,4 +33,8 @@ export class KeySignDto implements IKeySignDto {
 
     @IsString()
     public message: string;
+
+    @IsOptional()
+    @IsString()
+    public nonce?: string;
 }

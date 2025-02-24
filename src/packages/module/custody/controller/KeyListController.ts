@@ -73,5 +73,4 @@ export class KeyListController extends DefaultController<IKeyListDto, IKeyListDt
     }
 
     protected transform = async (item: KeyEntity): Promise<Key> => item.toObject();
-
 }

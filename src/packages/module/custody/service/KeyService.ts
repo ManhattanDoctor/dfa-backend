@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IKeyAsymmetric, Logger, LoggerWrapper, TraceUtil, Ed25519, UnreachableStatementError } from '@ts-core/common';
+import { IKeyAsymmetric, Logger, LoggerWrapper, TraceUtil, Ed25519, UnreachableStatementError, ISignature } from '@ts-core/common';
 import { KeyEntity } from '../entity';
 import { KeyAlgorithm, KeyForbiddenError, KeyNotFoundError } from '@project/common/custody';
 import { GostR3410 } from '@ts-core/crypto-gost';
@@ -71,9 +71,9 @@ export class KeyService extends LoggerWrapper {
         return item.save();
     }
 
-    public async sign(uid: string, message: string): Promise<string> {
-        let { algorithm, privateKey } = await this.get(uid);
-        return this.getManager(algorithm).sign(message, privateKey);
+    public async sign(uid: string, message: string, nonce?: string): Promise<ISignature> {
+        let { algorithm, privateKey, value } = await this.get(uid);
+        return { value: await this.getManager(algorithm).sign(message, privateKey), publicKey: value, algorithm, nonce }
     }
 
     public async verify(uid: string, message: string, signature: string): Promise<boolean> {

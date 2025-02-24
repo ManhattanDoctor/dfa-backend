@@ -1,6 +1,6 @@
 
 import { Company, CompanyStatus, CompanyTaxDetails } from '@project/common/platform/company';
-import { ObjectUtil, TransformUtil } from '@ts-core/common';
+import { ObjectUtil, TraceUtil, TransformUtil } from '@ts-core/common';
 import { TypeormJSONTransformer, TypeormValidableEntity } from '@ts-core/backend';
 import { Exclude, Type, ClassTransformOptions, Expose } from 'class-transformer';
 import { ValidateNested, Matches, IsEnum, IsJSON, IsNumber, IsOptional, IsString } from 'class-validator';
@@ -8,20 +8,24 @@ import { Column, OneToMany, CreateDateColumn, Entity, Index, OneToOne, PrimaryGe
 import { UserEntity } from '../user';
 import { CompanyPreferencesEntity } from './CompanyPreferencesEntity';
 import { UserUtil } from '@hlf-core/common';
-import { TRANSFORM_SINGLE } from '@project/module/core';
+import { HashUtil, TRANSFORM_SINGLE } from '@project/module/core';
+import { IHlfKeyOwner } from '@project/module/hlf/service';
 import * as _ from 'lodash';
 
 @Entity({ name: 'company' })
-export class CompanyEntity extends TypeormValidableEntity implements Company {
+export class CompanyEntity extends TypeormValidableEntity implements Company, IHlfKeyOwner {
     // --------------------------------------------------------------------------
     //
     //  Static Methods
     //
     // --------------------------------------------------------------------------
 
-    public static createEntity(user: Partial<Company>): CompanyEntity {
+    public static createEntity(company: Partial<CompanyEntity>): CompanyEntity {
+        if (_.isNil(company.uid)) {
+            company.uid = HashUtil.md5(TraceUtil.generate());
+        }
         let item = new CompanyEntity();
-        ObjectUtil.copyPartial(user, item);
+        ObjectUtil.copyPartial(company, item);
         return item;
     }
 
@@ -36,6 +40,10 @@ export class CompanyEntity extends TypeormValidableEntity implements Company {
     @IsNumber()
     public id: number;
 
+    @Column()
+    @IsString()
+    public uid: string;
+
     @Column({ type: 'varchar' })
     @IsEnum(CompanyStatus)
     public status: CompanyStatus;
@@ -44,9 +52,6 @@ export class CompanyEntity extends TypeormValidableEntity implements Company {
     @IsOptional()
     @Matches(UserUtil.UID_REG_EXP)
     public hlfUid?: string;
-
-    @CreateDateColumn()
-    public created: Date;
 
     @Expose({ groups: TRANSFORM_SINGLE })
     @Column({ type: 'json', transformer: TypeormJSONTransformer.instance })
@@ -57,6 +62,9 @@ export class CompanyEntity extends TypeormValidableEntity implements Company {
     @OneToOne(() => CompanyPreferencesEntity, preferences => preferences.company, { cascade: true })
     @ValidateNested()
     public preferences: CompanyPreferencesEntity;
+
+    @CreateDateColumn()
+    public created: Date;
 
     @Exclude()
     @OneToMany(() => UserEntity, item => item.company)

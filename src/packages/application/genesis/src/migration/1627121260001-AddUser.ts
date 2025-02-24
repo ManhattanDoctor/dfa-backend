@@ -13,6 +13,8 @@ export class AddUser1627121260001 implements MigrationInterface {
             (
                 "id" varchar not null
                     constraint "user_id_pkey" primary key,
+                "uid" varchar not null 
+                    constraint "user_uid_pkey" unique,
                 "login" varchar not null 
                     constraint "user_login_pkey" unique,
                 "status" varchar not null,

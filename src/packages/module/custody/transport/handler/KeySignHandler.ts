@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Logger, Transport, TransportCommandAsyncHandler } from '@ts-core/common';
+import { ISignature, Logger, Transport, TransportCommandAsyncHandler } from '@ts-core/common';
 import { KeySignCommand, IKeySignDto } from '../KeySignCommand';
 import { KeyService } from '../../service';
 import * as _ from 'lodash';
 
 @Injectable()
-export class KeySignHandler extends TransportCommandAsyncHandler<IKeySignDto, string, KeySignCommand> {
+export class KeySignHandler extends TransportCommandAsyncHandler<IKeySignDto, ISignature, KeySignCommand> {
     // --------------------------------------------------------------------------
     //
     //  Constructor
@@ -22,8 +22,8 @@ export class KeySignHandler extends TransportCommandAsyncHandler<IKeySignDto, st
     //
     // --------------------------------------------------------------------------
 
-    protected async execute(params: IKeySignDto): Promise<string> {
-        return this.service.sign(params.uid, params.message);
+    protected async execute(params: IKeySignDto): Promise<ISignature> {
+        return this.service.sign(params.uid, params.message, params.nonce);
     }
 }
 

@@ -58,6 +58,6 @@ export class KeyAddController extends DefaultController<void, Key> {
     @Post()
     @UseGuards(OpenIdGuard)
     public async executeExtended(@Body() params: KeyAddDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<Key> {
-        return this.transport.sendListen(new KeyAddCommand({ owner: bearer.user.sub, algorithm: params.algorithm, }))
+        return this.transport.sendListen(new KeyAddCommand({ owner: bearer.user.sub, algorithm: params.algorithm }))
     }
 }

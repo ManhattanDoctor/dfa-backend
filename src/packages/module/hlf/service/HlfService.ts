@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { Logger, LoggerWrapper, ITransportCommand, ITransportCommandAsync, ITransportCommandOptions } from '@ts-core/common';
 import { HlfMonitor } from './HlfMonitor';
-import { HlfApiClient } from './HlfApiClient';
+import { HlfApiClient, IHlfKeyOwner } from './HlfApiClient';
 import * as _ from 'lodash';
 
 @Injectable()
@@ -33,12 +33,30 @@ export class HlfService extends LoggerWrapper {
         }
     }
 
-    public async send<U, V>(command: ITransportCommand<U>, options?: ITransportCommandOptions, ledgerName?: string): Promise<void> {
-        await this.api.ledgerRequestSend(command, options, ledgerName);
+    public async send<U, V>(command: ITransportCommand<U>, options?: ITransportCommandOptions, signer?: IHlfKeyOwner): Promise<void> {
+        this.signer = signer;
+        try {
+            await this.api.ledgerRequestSend(command, options);
+        }
+        catch (error) {
+            throw error;
+        }
+        finally {
+            this.signer = null;
+        }
     }
 
-    public sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: ITransportCommandOptions, ledgerName?: string): Promise<V> {
-        return this.api.ledgerRequestSendListen(command, options, ledgerName);
+    public async sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: ITransportCommandOptions, signer?: IHlfKeyOwner): Promise<V> {
+        this.signer = signer;
+        try {
+            return this.api.ledgerRequestSendListen(command, options);
+        }
+        catch (error) {
+            throw error;
+        }
+        finally {
+            this.signer = null;
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -47,11 +65,10 @@ export class HlfService extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    public get userId(): string {
-        return this.api.userId;
+    public get signer(): IHlfKeyOwner {
+        return this.api.signer;
     }
-
-    public set userId(value: string) {
-        this.api.userId = value;
+    public set signer(value: IHlfKeyOwner) {
+        this.api.signer = value;
     }
 }

@@ -66,8 +66,7 @@ export class GenesisService extends KeycloakAdministratorTransport {
         this.warn(`Hlf company default crypto key changed`);
     }
 
-    private async addKeyIfNeed(company: Company): Promise<Key> {
-        let owner = company.hlfUid;
+    private async addKeyIfNeed(owner: string): Promise<Key> {
         let item = await this.transport.sendListen(new KeyGetByOwnerCommand(owner))
         if (!_.isNil(item)) {
             this.log(`Key for "${owner}" exists`);
@@ -86,7 +85,7 @@ export class GenesisService extends KeycloakAdministratorTransport {
         }
 
         item = UserEntity.createEntity({ id: openId.id, login, status: UserStatus.ACTIVE, companyId: company.id });
-        item.preferences = UserPreferencesEntity.createEntity({ name: login, picture: ImageUtil.getUser(item.id), email: openId.email });
+        item.preferences = UserPreferencesEntity.createEntity({ name: login, email: openId.email });
         await item.save();
         this.warn(`User "${login}" added`);
 
@@ -190,7 +189,7 @@ export class GenesisService extends KeycloakAdministratorTransport {
 
     public async initialize(login: string): Promise<void> {
         let company = await this.companyCheck();
-        let key = await this.addKeyIfNeed(company);
+        let key = await this.addKeyIfNeed(company.uid);
         await this.changeKeyIfNeed(company, key);
 
         let openId = await this.addOpenIdUserIfNeed(login, company);
@@ -213,12 +212,6 @@ interface IOpenIdUser {
 class GenesisHlfClient extends LedgerApiClient {
     protected async sign<U>(command: ITransportCommand<U>, options: ITransportFabricCommandOptions): Promise<void> {
         options.userId = Variables.seed.user.uid;
-        options.signature = await TransportCryptoManager.sign(
-            command,
-            new TransportCryptoManagerEd25519(),
-            {
-                publicKey: Variables.seed.cryptoKey.value,
-                privateKey: 'e87501bc00a3db3ba436f7109198e0cb65c5f929eabcedbbb5a9874abc2c73a3e365007e85508c6b44d5101a1d59d0061a48fd1bcd393186ccb5e7ae938a59a8'
-            });
+        options.signature = await TransportCryptoManager.sign(command, new TransportCryptoManagerEd25519(), { publicKey: Variables.seed.cryptoKey.value, privateKey: 'e87501bc00a3db3ba436f7109198e0cb65c5f929eabcedbbb5a9874abc2c73a3e365007e85508c6b44d5101a1d59d0061a48fd1bcd393186ccb5e7ae938a59a8' });
     }
 }

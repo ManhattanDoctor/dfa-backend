@@ -13,6 +13,8 @@ export class AddCompany1627121260000 implements MigrationInterface {
             (
                 "id" serial not null 
                     constraint "company_id_pkey" primary key,
+                "uid" varchar not null 
+                    constraint "company_uid_pkey" unique,
                 "hlf_uid" varchar 
                     constraint "company_hlf_uid_pkey" unique,
                 "status" varchar not null,

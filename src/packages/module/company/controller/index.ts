@@ -5,3 +5,4 @@ export * from './CompanyEditController';
 export * from './CompanyRejectController';
 export * from './CompanySubmitController';
 export * from './CompanyVerifyController';
+export * from './CompanyActivateController';

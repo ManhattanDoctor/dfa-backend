@@ -32,7 +32,7 @@ export class LoginService extends LoggerWrapper {
             return;
         }
         let item = UserEntity.createEntity({ id: sub, login: email, status: UserStatus.ACTIVE });
-        item.preferences = UserPreferencesEntity.createEntity({ name: name || email, email: email, picture: ImageUtil.getUser(sub) });
+        item.preferences = UserPreferencesEntity.createEntity({ name: name || email, email: email });
         await item.save();
     }
 

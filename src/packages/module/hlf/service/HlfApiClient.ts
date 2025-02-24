@@ -1,9 +1,9 @@
 import { LedgerApiClient } from '@hlf-explorer/common';
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
 import { HlfTransportCommand } from '@hlf-core/common';
-import { ITransportCommand, TransportCommandAsync, ILogger, ClassType, ExtendedError, Transport, TransportCryptoManager, ObjectUtil } from '@ts-core/common';
+import { ITransportCommand, TransportCommandAsync, ILogger, ClassType, ExtendedError, Transport, TransportCryptoManager, ObjectUtil, ISignature } from '@ts-core/common';
 import { IHlfSettings } from '@project/common/platform/settings';
-import { KeyTransportCryptoManager } from '@project/module/custody/service';
+import { KeyGetByOwnerCommand, KeySignCommand } from '@project/module/custody/transport';
 import * as _ from 'lodash';
 
 export class HlfApiClient extends LedgerApiClient {
@@ -13,8 +13,7 @@ export class HlfApiClient extends LedgerApiClient {
     //
     // --------------------------------------------------------------------------
 
-    public userId: string;
-    private manager: KeyTransportCryptoManager;
+    public signer: IHlfKeyOwner;
 
     // --------------------------------------------------------------------------
     //
@@ -22,9 +21,8 @@ export class HlfApiClient extends LedgerApiClient {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: ILogger, settings: IHlfSettings, transport: Transport) {
+    constructor(logger: ILogger, settings: IHlfSettings, private transport: Transport) {
         super(logger, settings.url, settings.name);
-        this.manager = new KeyTransportCryptoManager(transport);
     }
 
     // --------------------------------------------------------------------------
@@ -34,10 +32,20 @@ export class HlfApiClient extends LedgerApiClient {
     // --------------------------------------------------------------------------
 
     protected async sign<U>(command: HlfTransportCommand<U>, options?: ITransportFabricCommandOptions, ledgerName?: string): Promise<void> {
-        options.userId = this.userId;
-        if (!_.isNil(this.userId) && !command.isReadonly) {
-            options.signature = await TransportCryptoManager.sign(command, this.manager, { publicKey: this.userId, privateKey: this.userId });
+        if (_.isNil(this.signer) || command.isReadonly) {
+            return;
         }
+        let nonce = Date.now().toString();
+        options.userId = this.signer.hlfUid;
+        options.signature = await this.transport.sendListen(new KeySignCommand({ uid: await this.getKeyUid(this.signer.uid), message: TransportCryptoManager.toSign(command, nonce), nonce }));
+    }
+
+    protected async getKeyUid(owner: string): Promise<string> {
+        let key = await this.transport.sendListen(new KeyGetByOwnerCommand(owner));
+        if (_.isNil(key)) {
+            throw new ExtendedError(`Unable to find key for "${owner}"`);
+        }
+        return key.uid;
     }
 
     // --------------------------------------------------------------------------
@@ -61,4 +69,9 @@ export class HlfApiClient extends LedgerApiClient {
         }
         return item;
     }
+}
+
+export interface IHlfKeyOwner {
+    uid: string;
+    hlfUid?: string;
 }

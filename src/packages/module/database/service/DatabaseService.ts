@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Logger, LoggerWrapper } from '@ts-core/common';
-import { Connection, DataSource, SelectQueryBuilder } from 'typeorm';
+import { DataSource, SelectQueryBuilder } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { UserEntity } from '../user';
-import * as _ from 'lodash';
 import { CompanyEntity } from '@project/module/database/company';
-import { CompanyStatus } from '@project/common/platform/company';
 import { CompanyNotFoundError } from '@project/common/platform';
+import { Variables } from '@project/common/hlf';
+import * as _ from 'lodash';
+import { CoinBalanceEntity, CoinEntity } from '../coin';
 
 @Injectable()
 export class DatabaseService extends LoggerWrapper {
@@ -80,12 +81,44 @@ export class DatabaseService extends LoggerWrapper {
         return query.getOne();
     }
 
-    public async companyStatus(item: CompanyEntity, status: CompanyStatus): Promise<CompanyEntity> {
-        item.status = status;
-        return item.save();
+    public async companyPlatformGet(): Promise<CompanyEntity> {
+        return this.companyGet(Variables.seed.user.uid, true);
     }
 
     public companyAddRelations<T = any>(query: SelectQueryBuilder<T>): void {
         query.leftJoinAndSelect('company.preferences', 'companyPreferences');
+    }
+
+    // --------------------------------------------------------------------------
+    //
+    //  Coin Methods
+    //
+    // --------------------------------------------------------------------------
+
+    public async coinGet(idOrHlfUid: string | number): Promise<CoinEntity> {
+        let query = CoinEntity.createQueryBuilder('coin');
+        if (_.isNumber(idOrHlfUid)) {
+            query.where('coin.id  = :id', { id: idOrHlfUid });
+        }
+        else if (_.isString(idOrHlfUid)) {
+            query.where('coin.hlfUid  = :hlfUid', { hlfUid: idOrHlfUid });
+        }
+        this.addCoinRelations(query);
+        return query.getOne();
+    }
+
+    public async coinBalanceGet(ownerUid: string, coinUid: string): Promise<CoinBalanceEntity> {
+        let query = CoinBalanceEntity.createQueryBuilder('coinBalance');
+        query.where('coinBalance.ownerUid = :ownerUid', { ownerUid });
+        query.andWhere('coinBalance.coinUid = :coinUid', { coinUid });
+        this.addCoinBalanceRelations(query);
+        this.addCoinRelations(query);
+        return query.getOne();
+    }
+
+    public addCoinRelations<T = any>(query: SelectQueryBuilder<T>): void { }
+
+    public addCoinBalanceRelations<T = any>(query: SelectQueryBuilder<T>): void {
+        // query.leftJoinAndSelect('coinBalance.coin', 'coin');
     }
 }

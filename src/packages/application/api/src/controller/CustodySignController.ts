@@ -52,7 +52,8 @@ export class CustodyKeySignController extends DefaultController<void, string> {
         if (_.isNil(company)) {
             throw new CompanyUndefinedError();
         }
-        let key = await this.transport.sendListen(new KeyGetByOwnerCommand(bearer.user.company.hlfUid));
-        return this.transport.sendListen(new KeySignCommand({ uid: key.uid, message: params.message }))
+        let { uid } = await this.transport.sendListen(new KeyGetByOwnerCommand(bearer.user.company.hlfUid));
+        let item = await this.transport.sendListen(new KeySignCommand({ uid, message: params.message }))
+        return item.value;
     }
 }

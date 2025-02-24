@@ -1,6 +1,6 @@
 import { Controller, Post, UseGuards } from '@nestjs/common';
 import { DefaultController } from '@ts-core/backend';
-import { Logger, Transport } from '@ts-core/common';
+import { Logger, ObjectUtil, Transport } from '@ts-core/common';
 import { Swagger } from '@project/module/swagger';
 import { COMPANY_URL } from '@project/common/platform/api';
 import { Company, CompanyStatus, CompanyUtil } from '@project/common/platform/company';
@@ -8,12 +8,13 @@ import { OpenIdBearer, IOpenIdBearer, OpenIdGuard } from '@project/module/openid
 import { OpenIdGetUserInfo } from '@ts-core/backend-nestjs-openid';
 import { CompanyEditCommand, ICompanyEditDto } from '../transport';
 import { OpenIdService } from '@ts-core/openid-common';
-import * as _ from 'lodash';
 import { Key, KeyAlgorithm } from '@project/common/custody';
 import { KeyAddCommand, KeyGetByOwnerCommand } from '@project/module/custody/transport';
-import { HlfUidUndefinedError } from '@project/common/platform';
 import { HlfService } from '@project/module/hlf/service';
 import { UserAddCommand } from '@project/common/hlf/transport';
+import { CompanyEntity } from '@project/module/database/company';
+import * as _ from 'lodash';
+import { DatabaseService } from '@project/module/database/service';
 
 @Controller(`${COMPANY_URL}/activate`)
 export class CompanyActivateController extends DefaultController<void, Company> {
@@ -23,7 +24,7 @@ export class CompanyActivateController extends DefaultController<void, Company> 
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private transport: Transport, private openId: OpenIdService, private hlf: HlfService) {
+    constructor(logger: Logger, private transport: Transport, private database: DatabaseService, private openId: OpenIdService, private hlf: HlfService) {
         super(logger);
     }
 
@@ -41,14 +42,15 @@ export class CompanyActivateController extends DefaultController<void, Company> 
         return item;
     }
 
-    private async activate(company: Company): Promise<ICompanyEditDto> {
-        let { hlfUid } = company;
-        if (_.isNil(hlfUid)) {
-            let { algorithm, value } = await this.addKeyIfNeed(hlfUid);
-            let { uid } = await this.hlf.sendListen(new UserAddCommand({ cryptoKey: { algorithm, value } }));
-            hlfUid = uid;
+    private async activate(company: CompanyEntity): Promise<ICompanyEditDto> {
+        if (_.isNil(company.hlfUid)) {
+            this.hlf.signer = await this.database.companyPlatformGet();
+            
+            let key = await this.addKeyIfNeed(company.uid);
+            let { uid } = await this.hlf.sendListen(new UserAddCommand({ cryptoKey: { algorithm: key.algorithm, value: key.value } }));
+            company.hlfUid = uid;
         }
-        return { id: company.id, status: CompanyStatus.ACTIVE, hlfUid };
+        return { id: company.id, status: CompanyStatus.ACTIVE, hlfUid: company.hlfUid };
     }
 
     // --------------------------------------------------------------------------
@@ -63,8 +65,6 @@ export class CompanyActivateController extends DefaultController<void, Company> 
     @UseGuards(OpenIdGuard)
     public async executeExtended(@OpenIdBearer() bearer: IOpenIdBearer): Promise<Company> {
         CompanyUtil.isCanActivate(bearer.company, await this.openId.getResources(bearer.token.value), true);
-
-
         return this.transport.sendListen(new CompanyEditCommand(await this.activate(bearer.company)));
     }
 }

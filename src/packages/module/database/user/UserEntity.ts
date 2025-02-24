@@ -1,18 +1,18 @@
 
 import { User, UserStatus } from '@project/common/platform/user';
 import { TypeormValidableEntity } from '@ts-core/backend';
-import { TransformUtil, ObjectUtil, IUIDable } from '@ts-core/common';
+import { TransformUtil, ObjectUtil, IUIDable, TraceUtil } from '@ts-core/common';
 import { Expose, ClassTransformOptions, Exclude } from 'class-transformer';
 import { ValidateNested, IsEnum, IsNumber, IsString, IsOptional } from 'class-validator';
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm';
 import { UserPreferencesEntity } from './UserPreferencesEntity';
-import { TRANSFORM_PRIVATE } from '@project/module/core';
+import { HashUtil, TRANSFORM_PRIVATE } from '@project/module/core';
 import { CompanyEntity } from '../company';
 import { IOpenIdUser } from '@ts-core/openid-common';
 import * as _ from 'lodash';
 
 @Entity({ name: 'user' })
-export class UserEntity extends TypeormValidableEntity implements User, IOpenIdUser, IUIDable {
+export class UserEntity extends TypeormValidableEntity implements User, IOpenIdUser {
 
     // --------------------------------------------------------------------------
     //
@@ -20,7 +20,10 @@ export class UserEntity extends TypeormValidableEntity implements User, IOpenIdU
     //
     // --------------------------------------------------------------------------
 
-    public static createEntity(user: Partial<User>): UserEntity {
+    public static createEntity(user: Partial<UserEntity>): UserEntity {
+        if (_.isNil(user.uid)) {
+            user.uid = HashUtil.md5(TraceUtil.generate());
+        }
         let item = new UserEntity();
         ObjectUtil.copyPartial(user, item);
         return item;
@@ -36,6 +39,10 @@ export class UserEntity extends TypeormValidableEntity implements User, IOpenIdU
     @IsString()
     public id: string;
 
+    @Column()
+    @IsString()
+    public uid: string;
+
     @Expose({ groups: TRANSFORM_PRIVATE })
     @Column()
     @IsString()
@@ -46,13 +53,13 @@ export class UserEntity extends TypeormValidableEntity implements User, IOpenIdU
     @IsEnum(UserStatus)
     public status: UserStatus;
 
-    @Expose({ groups: TRANSFORM_PRIVATE })
-    @CreateDateColumn()
-    public created: Date;
-
     @OneToOne(() => UserPreferencesEntity, preferences => preferences.user, { cascade: true })
     @ValidateNested()
     public preferences: UserPreferencesEntity;
+
+    @Expose({ groups: TRANSFORM_PRIVATE })
+    @CreateDateColumn()
+    public created: Date;
 
     @Exclude()
     @Column({ name: 'company_id' })
@@ -83,10 +90,7 @@ export class UserEntity extends TypeormValidableEntity implements User, IOpenIdU
     //
     // --------------------------------------------------------------------------
 
-    public get uid(): string {
-        return this.id;
-    }
-    
+
     public get sub(): string {
         return this.id;
     }

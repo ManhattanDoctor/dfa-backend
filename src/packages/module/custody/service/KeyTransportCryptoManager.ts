@@ -1,9 +1,9 @@
 
-import { ISignature, ITransportCommand, Transport, TransportCryptoManager, TransportCryptoManagerEd25519 } from '@ts-core/common';
+import { ExtendedError, ISignature, ITransportCommand, Transport, TransportCryptoManager, TransportCryptoManagerEd25519 } from '@ts-core/common';
 import { KeyGetByOwnerCommand, KeySignCommand, KeyVerifyCommand } from '../transport';
+import * as _ from 'lodash';
 
 export class KeyTransportCryptoManager extends TransportCryptoManager {
-
 
     // --------------------------------------------------------------------------
     //
@@ -30,8 +30,11 @@ export class KeyTransportCryptoManager extends TransportCryptoManager {
     // --------------------------------------------------------------------------
 
     protected async getKeyId(owner: string): Promise<string> {
-        let { uid } = await this.transport.sendListen(new KeyGetByOwnerCommand(owner));
-        return uid;
+        let key = await this.transport.sendListen(new KeyGetByOwnerCommand(owner));
+        if (_.isNil(key)) {
+            throw new ExtendedError(`Unable to find key for "${owner}"`);
+        }
+        return key.uid;
     }
 
     // --------------------------------------------------------------------------
@@ -41,7 +44,8 @@ export class KeyTransportCryptoManager extends TransportCryptoManager {
     // --------------------------------------------------------------------------
 
     public async sign<U>(command: ITransportCommand<U>, nonce: string, privateKey: string): Promise<string> {
-        return this.transport.sendListen(new KeySignCommand({ uid: await this.getKeyId(privateKey), message: this.toSign(command, nonce) }));
+        let { value } = await this.transport.sendListen(new KeySignCommand({ uid: await this.getKeyId(privateKey), message: this.toSign(command, nonce) }));
+        return value;
     }
 
     public async verify<U>(command: ITransportCommand<U>, signature: ISignature): Promise<boolean> {
