@@ -45,9 +45,9 @@ export class CoinBalanceEntity extends TypeormValidableEntity implements CoinBal
     @IsNumberString()
     public total: string;
 
-    @Column({ name: 'owner_uid' })
+    @Column({ name: 'object_uid' })
     @IsString()
-    public ownerUid: string;
+    public objectUid: string;
 
     @Column({ name: 'coin_uid' })
     @Matches(CoinUtil.UID_REG_EXP)

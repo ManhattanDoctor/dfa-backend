@@ -8,7 +8,6 @@ import { INFO_URL, LedgerApiClient } from '@hlf-explorer/common';
 import { LedgerDatabase, LedgerMonitor } from '@hlf-explorer/monitor';
 import { HlfBlockParseHandler } from './transport/handler';
 import { IHlfSettings } from '@project/common/platform/settings';
-import { HlfObjectGetController } from './controller';
 
 export class HlfModule {
     // --------------------------------------------------------------------------
@@ -52,7 +51,6 @@ export class HlfModule {
             module: HlfModule,
             imports: [DatabaseModule],
             exports: [HlfService],
-            controllers: [HlfObjectGetController],
             global: true,
             providers,
         };

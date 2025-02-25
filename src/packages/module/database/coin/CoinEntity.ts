@@ -43,6 +43,7 @@ export class CoinEntity extends TypeormValidableEntity implements Coin {
 
     @Expose({ groups: TRANSFORM_SINGLE })
     @Column({ type: 'json', transformer: TypeormJSONTransformer.instance })
+    @IsOptional()
     @ValidateNested()
     public data?: ICoinData;
 
@@ -52,11 +53,13 @@ export class CoinEntity extends TypeormValidableEntity implements Coin {
 
     @Expose({ groups: TRANSFORM_SINGLE })
     @Column({ type: 'json', transformer: TypeormJSONTransformer.instance })
+    @IsOptional()
     @ValidateNested()
     public balance?: ICoinBalance;
 
     @Expose({ groups: TRANSFORM_SINGLE })
     @Column({ type: 'json', transformer: TypeormJSONTransformer.instance })
+    @IsOptional()
     @ValidateNested()
     public permissions?: Array<ICoinPermission>;
 

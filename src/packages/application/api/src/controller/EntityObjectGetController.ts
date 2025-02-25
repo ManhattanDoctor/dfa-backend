@@ -3,15 +3,14 @@ import { DefaultController, Cache } from '@ts-core/backend-nestjs';
 import { Logger, ExtendedError, DateUtil } from '@ts-core/common';
 import { Swagger } from '@project/module/swagger';
 import { getType, ObjectType } from '@project/common/hlf';
-import { HLF_OBJECT_URL } from '@project/common/platform/api';
-import { IHlfObject, hlfObjectPicture } from '@project/common/platform/api/hlf';
-import { IHlfObjectGetDtoResponse } from '@project/common/platform/api/hlf';
+import { ENTITY_OBJECT_URL } from '@project/common/platform/api';
+import { IEntityObject, IEntityObjectGetDtoResponse, entityObjectPicture } from '@project/common/platform/api/entity';
 import { CompanyEntity } from '@project/module/database/company';
 import { CoinEntity } from '@project/module/database/coin';
 import * as _ from 'lodash';
 
-@Controller(`${HLF_OBJECT_URL}/:uid`)
-export class HlfObjectGetController extends DefaultController<string, IHlfObjectGetDtoResponse> {
+@Controller(`${ENTITY_OBJECT_URL}/:uid`)
+export class EntityObjectGetController extends DefaultController<string, IEntityObjectGetDtoResponse> {
     // --------------------------------------------------------------------------
     //
     //  Constructor
@@ -28,15 +27,15 @@ export class HlfObjectGetController extends DefaultController<string, IHlfObject
     //
     // --------------------------------------------------------------------------
 
-    private async getItem(uid: string): Promise<IHlfObject> {
+    private async getItem(uid: string): Promise<IEntityObject> {
         let type = getType(uid);
         if (type === ObjectType.USER) {
             let item = await CompanyEntity.createQueryBuilder('item').leftJoinAndSelect('item.preferences', 'preferences').where('item.hlfUid  = :uid', { uid }).getOne();
-            return { id: item.id, name: item.preferences.name, picture: hlfObjectPicture(uid, { display: 'monsterid' }), type };
+            return { id: item.id, name: item.preferences.name, picture: entityObjectPicture(uid, { display: 'monsterid' }), type };
         }
         else if (type === ObjectType.COIN) {
             let item = await CoinEntity.createQueryBuilder('item').where('item.hlfUid  = :uid', { uid }).getOne();
-            return { id: item.id, name: item.hlfUid, picture: hlfObjectPicture(uid, { display: 'retro' }), type };
+            return { id: item.id, name: item.hlfUid, picture: entityObjectPicture(uid, { display: 'retro' }), type };
         }
         throw new ExtendedError(`Unknown "${type}" type`);
     }
@@ -53,7 +52,7 @@ export class HlfObjectGetController extends DefaultController<string, IHlfObject
 
     @Swagger({ name: 'Get hlf object', response: null })
     @Get()
-    public async executeExtended(@Param('uid') uid: string): Promise<IHlfObjectGetDtoResponse> {
-        return this.cache.wrap<IHlfObject>(this.getCacheKey(uid), () => this.getItem(uid), DateUtil.MILLISECONDS_DAY);
+    public async executeExtended(@Param('uid') uid: string): Promise<IEntityObjectGetDtoResponse> {
+        return this.cache.wrap<IEntityObject>(this.getCacheKey(uid), () => this.getItem(uid), DateUtil.MILLISECONDS_DAY);
     }
 }

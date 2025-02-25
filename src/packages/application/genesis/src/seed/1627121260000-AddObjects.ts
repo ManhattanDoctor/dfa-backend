@@ -47,7 +47,7 @@ export class AddObjects1627121260000 implements MigrationInterface {
         balance.inUse = balance.total = Variables.seed.coin.amount;
         balance.coinId = coin.id;
         balance.coinUid = coin.hlfUid;
-        balance.ownerUid = Variables.seed.coin.ownerUid;
+        balance.objectUid = Variables.seed.coin.ownerUid;
         await runner.connection.getRepository(CoinBalanceEntity).save(balance);
     }
 

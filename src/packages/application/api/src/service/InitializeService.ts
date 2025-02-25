@@ -9,6 +9,8 @@ import { CompanyStatus } from '@project/common/platform/company';
 import { UserAddCommand, UserGetCommand } from '@project/common/hlf/transport';
 import { Variables } from '@project/common/hlf';
 import { DatabaseService } from '@project/module/database/service';
+import { OpenIdSynchronizeCommand } from '@project/module/openid/transport';
+import { CoinBalanceSynchronizeCommand, CoinSynchronizeCommand } from '@project/module/coin/transport';
 
 
 @Injectable()
@@ -45,17 +47,18 @@ export class InitializeService extends LoggerWrapper {
 
     public async initialize(): Promise<void> {
         await this.hlf.initialize();
+
         /*
-        let item = await this.database.companyPlatformGet();
-        let command = new UserGetCommand({ uid: item.hlfUid, details: ['cryptoKey'] });
-        let manager = new KeyTransportCryptoManager(this.transport);
+       let item = await this.database.companyPlatformGet();
+       let command = new UserGetCommand({ uid: item.hlfUid, details: ['cryptoKey'] });
+       let manager = new KeyTransportCryptoManager(this.transport);
 
-        console.log(item.uid);
+       console.log(item.uid);
 
-        let signature = await TransportCryptoManager.sign(command, manager, { privateKey: item.uid, publicKey: item.uid });
-        console.log(await TransportCryptoManager.verify(command, manager, signature));
-        console.log(signature);
-        */
+       let signature = await TransportCryptoManager.sign(command, manager, { privateKey: item.uid, publicKey: item.uid });
+       console.log(await TransportCryptoManager.verify(command, manager, signature));
+       console.log(signature);
+       */
         // await this.hlf.initialize();
 
         // console.log(await CompanyEntity.find());

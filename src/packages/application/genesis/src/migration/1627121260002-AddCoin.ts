@@ -38,12 +38,12 @@ export class AddCoin1627121260002 implements MigrationInterface {
                 "in_use" varchar not null,
 
                 "coin_uid" varchar not null,
-                "owner_uid" varchar not null,
+                "object_uid" varchar not null,
 
                 "created" timestamp default now() not null
             );
 
-            create unique index "coin_balance_ukey_coin_id_owner_uid" on "coin_balance" (coin_id, owner_uid);
+            create unique index "coin_balance_ukey_coin_id_object_uid" on "coin_balance" (coin_id, object_uid);
         `;
         await queryRunner.query(sql);
     }
@@ -54,7 +54,7 @@ export class AddCoin1627121260002 implements MigrationInterface {
             drop index if exists "coin_hlf_uid_ukey";
 
             drop table if exists "coin_balance" cascade;
-            drop index if exists "coin_balance_ukey_coin_id_owner_uid";
+            drop index if exists "coin_balance_ukey_coin_id_object_uid";
         `;
         await queryRunner.query(sql);
     }

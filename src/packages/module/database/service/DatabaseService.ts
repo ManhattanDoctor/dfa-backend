@@ -95,7 +95,7 @@ export class DatabaseService extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    public async coinGet(idOrHlfUid: string | number): Promise<CoinEntity> {
+    public async coinGet(idOrHlfUid: string | number, isNeedRelations: boolean): Promise<CoinEntity> {
         let query = CoinEntity.createQueryBuilder('coin');
         if (_.isNumber(idOrHlfUid)) {
             query.where('coin.id  = :id', { id: idOrHlfUid });
@@ -103,13 +103,15 @@ export class DatabaseService extends LoggerWrapper {
         else if (_.isString(idOrHlfUid)) {
             query.where('coin.hlfUid  = :hlfUid', { hlfUid: idOrHlfUid });
         }
-        this.addCoinRelations(query);
+        if (isNeedRelations) {
+            this.addCoinRelations(query);
+        }
         return query.getOne();
     }
 
-    public async coinBalanceGet(ownerUid: string, coinUid: string): Promise<CoinBalanceEntity> {
+    public async coinBalanceGet(objectUid: string, coinUid: string): Promise<CoinBalanceEntity> {
         let query = CoinBalanceEntity.createQueryBuilder('coinBalance');
-        query.where('coinBalance.ownerUid = :ownerUid', { ownerUid });
+        query.where('coinBalance.objectUid = :objectUid', { objectUid });
         query.andWhere('coinBalance.coinUid = :coinUid', { coinUid });
         this.addCoinBalanceRelations(query);
         this.addCoinRelations(query);

@@ -15,12 +15,13 @@ import { OpenIdModule } from '@project/module/openid';
 import { LoginModule } from '@project/module/login';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { THROTTLE_DEFAULT } from '@project/module/core';
-import { ConfigController, CustodyKeyGetController, CustodyKeySignController } from './controller';
+import { ConfigController, CustodyKeyGetController, CustodyKeySignController, EntityObjectGetController } from './controller';
 import { LanguageModule } from '@project/module/language';
 import { TaxModule } from '@project/module/tax';
 import { CustodyModule } from '@project/module/custody';
 import { CompanyModule } from '@project/module/company';
 import { ActionModule } from '@project/module/action';
+import { CoinModule } from '@project/module/coin';
 
 @Injectable()
 export class AppModule extends ModeApplication<AppSettings> implements OnApplicationBootstrap {
@@ -45,6 +46,7 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
                 ThrottlerModule.forRoot([THROTTLE_DEFAULT]),
 
                 TaxModule,
+                CoinModule,
                 UserModule,
                 LoginModule,
                 SocketModule,
@@ -58,7 +60,8 @@ export class AppModule extends ModeApplication<AppSettings> implements OnApplica
             controllers: [
                 ConfigController,
                 CustodyKeyGetController,
-                CustodyKeySignController
+                CustodyKeySignController,
+                EntityObjectGetController
             ],
             providers: [
                 {
