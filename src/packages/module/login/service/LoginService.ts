@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { KeycloakUtil, OpenIdService } from '@ts-core/openid-common';
-import { Logger, LoggerWrapper } from '@ts-core/common';
+import { Logger, LoggerWrapper, Transport } from '@ts-core/common';
 import { ILoginDto, ILoginDtoResponse } from '@project/common/platform/api/login';
 import { DatabaseService } from '@project/module/database/service';
 import { UserEntity, UserPreferencesEntity } from '@project/module/database/user';
 import { UserStatus } from '@project/common/platform/user';
-import { ImageUtil } from '@project/common/platform/util';
+import { OpenIdSynchronizeCommand } from '@project/module/openid/transport';
 
 @Injectable()
 export class LoginService extends LoggerWrapper {
@@ -16,7 +16,7 @@ export class LoginService extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private openId: OpenIdService, private database: DatabaseService) {
+    constructor(logger: Logger, private transport: Transport, private openId: OpenIdService, private database: DatabaseService) {
         super(logger);
     }
 
@@ -34,6 +34,8 @@ export class LoginService extends LoggerWrapper {
         let item = UserEntity.createEntity({ id: sub, login: email, status: UserStatus.ACTIVE });
         item.preferences = UserPreferencesEntity.createEntity({ name: name || email, email: email });
         await item.save();
+
+        await this.transport.sendListen(new OpenIdSynchronizeCommand(item.id));
     }
 
     // --------------------------------------------------------------------------

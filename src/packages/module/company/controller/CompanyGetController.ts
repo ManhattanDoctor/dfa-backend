@@ -41,7 +41,7 @@ export class CompanyGetController extends DefaultController<number, ICompanyGetD
     @Get()
     @OpenIdResourcePermission(ResourcePermission.COMPANY_READ)
     @UseGuards(OpenIdGuard)
-    public async executeExtended(@Param('id', ParseIntPipe) id: number): Promise<ICompanyGetDtoResponse> {
+    public async execute(@Param('id', ParseIntPipe) id: number): Promise<ICompanyGetDtoResponse> {
         let item = await this.database.companyGet(id, true);
         if (_.isNil(item)) {
             throw new CompanyNotFoundError(id);

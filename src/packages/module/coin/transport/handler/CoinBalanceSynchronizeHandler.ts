@@ -7,8 +7,9 @@ import { CoinBalanceEntity, CoinEntity } from '@project/module/database/coin';
 import { CoinBalanceGetCommand } from '@hlf-core/coin';
 import { CoinBalanceChangedEvent } from '@project/common/platform/transport';
 import { HlfService } from '@project/module/hlf/service';
-import { getSocketCoinBalanceRoom } from '@project/common/platform';
+import { CoinNotFoundError, getSocketCoinBalanceRoom } from '@project/common/platform';
 import * as _ from 'lodash';
+import { CoinBalanceEditCommand } from '../CoinBalanceEditCommand';
 
 @Injectable()
 export class CoinBalanceSynchronizeHandler extends TransportCommandHandler<ICoinBalanceSynchronizeDto, CoinBalanceSynchronizeCommand> {
@@ -33,17 +34,22 @@ export class CoinBalanceSynchronizeHandler extends TransportCommandHandler<ICoin
         let { objectUid, coinUid } = params;
         let balance = await this.hlf.sendListen(new CoinBalanceGetCommand({ objectUid, coinUid }));
 
-        let item = await this.database.coinBalanceGet(objectUid, coinUid);
+        let item = await CoinBalanceEntity.createQueryBuilder('coinBalance')
+            .where('coinBalance.objectUid = :objectUid', { objectUid })
+            .andWhere('coinBalance.coinUid = :coinUid', { coinUid })
+            .getOne();
+
         if (_.isNil(item)) {
-            let { id } = await CoinEntity.findOneByOrFail({ hlfUid: coinUid });
-            
+            let coin = await this.database.coinGet(coinUid, false);
+            if (_.isNil(coin)) {
+                throw new CoinNotFoundError(coinUid);
+            }
             item = new CoinBalanceEntity();
-            item.coinId = id;
+            item.coinId = coin.id;
             item.coinUid = coinUid;
             item.objectUid = objectUid;
+            await item.save();
         }
-        console.log(balance);
-        await CoinBalanceEntity.updateEntity(item, balance).save();
-        this.socket.dispatch(new CoinBalanceChangedEvent(item.toObject()), { room: getSocketCoinBalanceRoom(params.objectUid) });
+        await this.transport.sendListen(new CoinBalanceEditCommand({ id: item.id, held: balance.held, inUse: balance.inUse, total: balance.total }));
     }
 }

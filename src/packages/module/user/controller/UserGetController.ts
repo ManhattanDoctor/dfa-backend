@@ -27,7 +27,7 @@ export class UserGetController extends DefaultController<number, IUserGetDtoResp
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private database: DatabaseService, private openId: OpenIdService) {
+    constructor(logger: Logger, private database: DatabaseService) {
         super(logger);
     }
 

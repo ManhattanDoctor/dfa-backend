@@ -14,6 +14,7 @@ import { TRANSFORM_LIST } from '@project/module/core';
 import { IOpenIdBearer, OpenIdBearer, OpenIdGuard, OpenIdResourcePermission } from '@project/module/openid';
 import * as _ from 'lodash';
 import { ResourcePermission } from '@project/common/platform';
+import { DatabaseService } from '@project/module/database/service';
 
 // --------------------------------------------------------------------------
 //
@@ -68,7 +69,7 @@ export class UserListController extends DefaultController<IUserListDto, IUserLis
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger) {
+    constructor(logger: Logger, private database: DatabaseService) {
         super(logger);
     }
 
@@ -87,7 +88,7 @@ export class UserListController extends DefaultController<IUserListDto, IUserLis
         if (!_.isNil(bearer.token.content.company)) {
             query.where('user.companyId  = :companyId', { companyId: bearer.token.content.company.id });
         }
-        query.leftJoinAndSelect('user.preferences', 'userPreferences');
+        this.database.userRelationsAdd(query);
         return TypeormUtil.toPagination(query, params, this.transform);
     }
 

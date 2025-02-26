@@ -35,7 +35,7 @@ export class CoinEditCommand extends TransportCommandAsync<ICoinEditDto, Coin> {
 }
 
 export interface ICoinEditDto {
-    id: number | string;
+    id: number;
     data?: ICoinData;
     hlfUid?: string;
     status?: CoinStatus;

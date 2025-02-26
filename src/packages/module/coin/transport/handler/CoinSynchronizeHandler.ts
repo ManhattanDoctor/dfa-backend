@@ -33,6 +33,10 @@ export class CoinSynchronizeHandler extends TransportCommandHandler<string, Coin
         if (_.isNil(coin)) {
             throw new CoinNotFoundError(params);
         }
-        await this.transport.sendListen(new CoinEditCommand({ id: params, balance: coin.balance, data: coin.data, permissions: coin.permissions }))
+        let item = await this.database.coinGet(params, false);
+        if (_.isNil(item)) {
+            throw new CoinNotFoundError(params);
+        }
+        await this.transport.sendListen(new CoinEditCommand({ id: item.id, balance: coin.balance, data: coin.data, permissions: coin.permissions }));
     }
 }

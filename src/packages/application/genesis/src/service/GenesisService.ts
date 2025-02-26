@@ -95,7 +95,7 @@ export class GenesisService extends KeycloakAdministratorTransport {
         let enabled = true;
         let lastName = login;
         let firstName = login;
-        let attributes = { company: JSON.stringify({ id: company.id }) };
+        let attributes = { status: UserStatus.ACTIVE, company: JSON.stringify({ id: company.id }) };
         let credentials = [{ type: 'password', value: 'password', temporary: true }];
         let emailVerified = false;
         let requiredActions = ['CONFIGURE_TOTP', 'UPDATE_PASSWORD', 'VERIFY_EMAIL'];
@@ -105,27 +105,35 @@ export class GenesisService extends KeycloakAdministratorTransport {
         requiredActions = [];
 
         let item = await this.getUser(login);
-        let data = {
-            email: login,
-            username: login,
-            enabled,
-            lastName,
-            firstName,
-            attributes,
-            credentials,
-            emailVerified,
-            requiredActions,
-        }
         if (_.isNil(item)) {
             await this.call(`admin/realms/${this.settings.realm}/users`, {
-                data,
+                data: {
+                    email: login,
+                    username: login,
+                    enabled,
+                    lastName,
+                    firstName,
+                    attributes,
+                    credentials,
+                    emailVerified,
+                    requiredActions,
+                },
                 method: 'post'
             });
             this.warn(`OpenId user "${login}" added`);
         }
         else {
             await this.call(`admin/realms/${this.settings.realm}/users/${item.id}`, {
-                data,
+                data: {
+                    email: item.email,
+                    enabled,
+                    lastName,
+                    firstName,
+                    attributes,
+                    credentials,
+                    emailVerified,
+                    requiredActions,
+                },
                 method: 'put',
                 headers: { 'Content-Type': 'application/json' }
             });

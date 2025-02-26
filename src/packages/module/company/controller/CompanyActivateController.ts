@@ -12,9 +12,8 @@ import { Key, KeyAlgorithm } from '@project/common/custody';
 import { KeyAddCommand, KeyGetByOwnerCommand } from '@project/module/custody/transport';
 import { HlfService } from '@project/module/hlf/service';
 import { UserAddCommand } from '@project/common/hlf/transport';
-import { CompanyEntity } from '@project/module/database/company';
-import * as _ from 'lodash';
 import { DatabaseService } from '@project/module/database/service';
+import * as _ from 'lodash';
 
 @Controller(`${COMPANY_URL}/activate`)
 export class CompanyActivateController extends DefaultController<void, Company> {
@@ -42,12 +41,13 @@ export class CompanyActivateController extends DefaultController<void, Company> 
         return item;
     }
 
-    private async activate(company: CompanyEntity): Promise<ICompanyEditDto> {
+    private async activate(bearer: IOpenIdBearer): Promise<ICompanyEditDto> {
+        let { user, company } = bearer;
         if (_.isNil(company.hlfUid)) {
             this.hlf.signer = await this.database.companyPlatformGet();
-            
+
             let key = await this.addKeyIfNeed(company.uid);
-            let { uid } = await this.hlf.sendListen(new UserAddCommand({ cryptoKey: { algorithm: key.algorithm, value: key.value } }));
+            let { uid } = await this.hlf.sendListen(new UserAddCommand({ initiatorUid: user.uid, cryptoKey: { algorithm: key.algorithm, value: key.value } }));
             company.hlfUid = uid;
         }
         return { id: company.id, status: CompanyStatus.ACTIVE, hlfUid: company.hlfUid };
@@ -65,6 +65,6 @@ export class CompanyActivateController extends DefaultController<void, Company> 
     @UseGuards(OpenIdGuard)
     public async executeExtended(@OpenIdBearer() bearer: IOpenIdBearer): Promise<Company> {
         CompanyUtil.isCanActivate(bearer.company, await this.openId.getResources(bearer.token.value), true);
-        return this.transport.sendListen(new CompanyEditCommand(await this.activate(bearer.company)));
+        return this.transport.sendListen(new CompanyEditCommand(await this.activate(bearer)));
     }
 }

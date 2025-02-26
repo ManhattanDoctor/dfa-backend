@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Logger, ClassType, Transport } from '@ts-core/common';
 import { LedgerApiClient } from '@hlf-explorer/common';
+import { Event as CoinEvent } from '@hlf-core/coin';
 import { LedgerDatabase, LedgerBlockParseHandler, LedgerEventParser, ILedgerBlockParserEffects } from '@hlf-explorer/monitor';
 import { DatabaseService } from '@project/module/database/service';
 import { TransportSocket } from '@ts-core/socket-server';
+import { Event } from '@project/common/hlf/transport';
+import { CoinBurned, CoinEmitted, CoinHolded, CoinTransferred, CoinUnholded, UserAdded } from '../../lib/parser';
 import * as _ from 'lodash';
 
 @Injectable()
@@ -17,15 +20,16 @@ export class HlfBlockParseHandler extends LedgerBlockParseHandler {
     constructor(logger: Logger, transport: Transport, database: LedgerDatabase, api: LedgerApiClient, private databaseService: DatabaseService, private socket: TransportSocket) {
         super(logger, transport, database, api);
 
+
+        this.parserAdd(Event.USER_ADDED, UserAdded);
+
+        this.parserAdd(CoinEvent.COIN_HOLDED, CoinHolded);
+        this.parserAdd(CoinEvent.COIN_BURNED, CoinBurned);
+        this.parserAdd(CoinEvent.COIN_EMITTED, CoinEmitted);
+        this.parserAdd(CoinEvent.COIN_UNHOLDED, CoinUnholded);
+        this.parserAdd(CoinEvent.COIN_TRANSFERRED, CoinTransferred);
+
         /*
-        this.parserAdd(AclEvent.USER_ADDED, UserAdded);
-
-        this.parserAdd(AuctionEvent.COIN_HOLDED, CoinHolded);
-        this.parserAdd(AuctionEvent.COIN_BURNED, CoinBurned);
-        this.parserAdd(AuctionEvent.COIN_EMITTED, CoinEmitted);
-        this.parserAdd(AuctionEvent.COIN_UNHOLDED, CoinUnholded);
-        this.parserAdd(AuctionEvent.COIN_TRANSFERRED, CoinTransferred);
-
         this.parserAdd(AuctionEvent.AUCTION_ADDED, AuctionAdded);
         this.parserAdd(AuctionEvent.AUCTION_BIDED, AuctionBided);
         this.parserAdd(AuctionEvent.AUCTION_FINISHED, AuctionFinished);

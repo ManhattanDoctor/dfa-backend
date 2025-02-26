@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Logger, Transport, LoggerWrapper, ISignature, TransportCryptoManager } from '@ts-core/common';
+import { Logger, Transport, LoggerWrapper, ISignature, TransportCryptoManager, DateUtil, RandomUtil } from '@ts-core/common';
 import { TransportSocket } from '@ts-core/socket-server';
 import { HlfService } from '@project/module/hlf/service';
 import * as _ from 'lodash';
@@ -10,7 +10,7 @@ import { UserAddCommand, UserGetCommand } from '@project/common/hlf/transport';
 import { Variables } from '@project/common/hlf';
 import { DatabaseService } from '@project/module/database/service';
 import { OpenIdSynchronizeCommand } from '@project/module/openid/transport';
-import { CoinBalanceSynchronizeCommand, CoinSynchronizeCommand } from '@project/module/coin/transport';
+import { CoinBalanceEditCommand, CoinBalanceSynchronizeCommand, CoinSynchronizeCommand } from '@project/module/coin/transport';
 
 
 @Injectable()
@@ -47,7 +47,6 @@ export class InitializeService extends LoggerWrapper {
 
     public async initialize(): Promise<void> {
         await this.hlf.initialize();
-
         /*
        let item = await this.database.companyPlatformGet();
        let command = new UserGetCommand({ uid: item.hlfUid, details: ['cryptoKey'] });

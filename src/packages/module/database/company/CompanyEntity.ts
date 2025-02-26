@@ -11,6 +11,7 @@ import { UserUtil } from '@hlf-core/common';
 import { HashUtil, TRANSFORM_SINGLE } from '@project/module/core';
 import { IHlfKeyOwner } from '@project/module/hlf/service';
 import * as _ from 'lodash';
+import { CoinEntity } from '@project/module/database/coin';
 
 @Entity({ name: 'company' })
 export class CompanyEntity extends TypeormValidableEntity implements Company, IHlfKeyOwner {
@@ -70,6 +71,11 @@ export class CompanyEntity extends TypeormValidableEntity implements Company, IH
     @OneToMany(() => UserEntity, item => item.company)
     @Type(() => UserEntity)
     public users: Array<UserEntity>;
+
+    @Exclude()
+    @OneToMany(() => CoinEntity, item => item.company)
+    @Type(() => CoinEntity)
+    public coins: Array<CoinEntity>;
 
     // --------------------------------------------------------------------------
     //

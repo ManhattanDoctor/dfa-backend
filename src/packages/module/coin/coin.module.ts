@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '@project/module/database';
 import { CoinGetController, CoinBalanceListController, CoinBalanceGetController, CoinListController } from './controller';
-import { CoinSynchronizeHandler, CoinBalanceSynchronizeHandler, CoinEditHandler } from './transport/handler';
+import { CoinSynchronizeHandler, CoinBalanceSynchronizeHandler, CoinEditHandler, CoinBalanceEditHandler } from './transport/handler';
 
 @Module({
     imports: [DatabaseModule],
@@ -14,6 +14,7 @@ import { CoinSynchronizeHandler, CoinBalanceSynchronizeHandler, CoinEditHandler 
     providers: [
         CoinEditHandler,
         CoinSynchronizeHandler,
+        CoinBalanceEditHandler,
         CoinBalanceSynchronizeHandler,
     ]
 })

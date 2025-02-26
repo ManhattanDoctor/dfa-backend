@@ -39,7 +39,7 @@ export class UserEditHandler extends TransportCommandAsyncHandler<IUserEditDto, 
     // --------------------------------------------------------------------------
 
     private isNeedOpenIdSynchronize(item: IUserEditDto): boolean {
-        return !_.isNil(item.companyId);
+        return !_.isNil(item.companyId) || !_.isNil(item.status);
     }
 
     // --------------------------------------------------------------------------

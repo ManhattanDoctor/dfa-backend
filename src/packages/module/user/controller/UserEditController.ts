@@ -5,17 +5,17 @@ import { Logger, Transport } from '@ts-core/common';
 import { IsDefined, MaxLength, ValidateNested, IsEnum, IsOptional, Length, IsNotEmpty, IsString, IsPhoneNumber, IsEmail, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IUserEditDto, IUserEditDtoResponse } from '@project/common/platform/api/user';
-import { User, UserPreferences, UserPreferencesLanguage, UserStatus, UserPreferencesTheme, USER_PREFERENCES_EMAIL_MAX_LENGTH, USER_PREFERENCES_NAME_MAX_LENGTH, USER_PREFERENCES_NAME_MIN_LENGTH, USER_PREFERENCES_PICTURE_MAX_LENGTH, USER_PREFERENCES_PHONE_MAX_LENGTH } from '@project/common/platform/user';
+import { User, UserPreferences, UserPreferencesLanguage, UserStatus, UserPreferencesTheme, USER_PREFERENCES_EMAIL_MAX_LENGTH, USER_PREFERENCES_NAME_MAX_LENGTH, USER_PREFERENCES_NAME_MIN_LENGTH, USER_PREFERENCES_PICTURE_MAX_LENGTH, USER_PREFERENCES_PHONE_MAX_LENGTH, UserUtil } from '@project/common/platform/user';
 import { USER_URL } from '@project/common/platform/api';
 import { Swagger } from '@project/module/swagger';
 import { DatabaseService } from '@project/module/database/service';
 import { Transform } from 'class-transformer';
-import { OpenIdBearer, IOpenIdBearer, OpenIdGuard, Token } from '@project/module/openid';
+import { OpenIdBearer, IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
 import { ParseUtil } from '@project/module/util';
-import { getResourceValidationOptions, ResourcePermission } from '@project/common/platform';
 import { OpenIdService } from '@ts-core/openid-common';
 import { TransportSocket } from '@ts-core/socket-server';
 import { UserEditCommand } from '../transport';
+import { OpenIdGetUserInfo } from '@ts-core/backend-nestjs-openid';
 import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
@@ -68,11 +68,6 @@ class UserPreferencesDto implements Partial<UserPreferences> {
 export class UserEditDto implements IUserEditDto {
     @ApiPropertyOptional()
     @IsOptional()
-    @IsEnum(UserStatus)
-    public status?: UserStatus;
-
-    @ApiPropertyOptional()
-    @IsOptional()
     @IsDefined()
     @Type(() => UserPreferencesDto)
     @ValidateNested()
@@ -84,7 +79,7 @@ export class UserEditDto implements IUserEditDto {
     public traceId?: string;
 }
 
-@Controller(`${USER_URL}/:id`)
+@Controller(USER_URL)
 export class UserEditController extends DefaultController<IUserEditDto, IUserEditDtoResponse> {
     // --------------------------------------------------------------------------
     //
@@ -98,28 +93,16 @@ export class UserEditController extends DefaultController<IUserEditDto, IUserEdi
 
     // --------------------------------------------------------------------------
     //
-    //  Private Methods
-    //
-    // --------------------------------------------------------------------------
-
-    private async validate(id: string, params: IUserEditDto, token: Token): Promise<void> {
-        if (id === token.id && _.isNil(params.status)) {
-            return;
-        }
-        await this.openId.validateResource(token.value, getResourceValidationOptions(ResourcePermission.USER_EDIT));
-    }
-
-    // --------------------------------------------------------------------------
-    //
     //  Public Methods
     //
     // --------------------------------------------------------------------------
 
     @Swagger({ name: 'User edit', response: User })
     @Put()
+    @OpenIdGetUserInfo()
     @UseGuards(OpenIdGuard)
-    public async executeExtended(@Param('id') id: string, @Body() params: UserEditDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<IUserEditDtoResponse> {
-        await this.validate(id, params, bearer.token);
-        return this.transport.sendListen(new UserEditCommand(Object.assign(params, { id })));
+    public async executeExtended(@Body() params: UserEditDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<IUserEditDtoResponse> {
+        UserUtil.isCanEdit(bearer.user, await this.openId.getResources(bearer.token.value), true);
+        return this.transport.sendListen(new UserEditCommand({ id: bearer.user.id, preferences: params.preferences }));
     }
 }

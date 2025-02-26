@@ -1,7 +1,7 @@
 import { TransformUtil, ObjectUtil } from '@ts-core/common';
 import { Type, ClassTransformOptions, Exclude, Expose, Transform } from 'class-transformer';
 import { Matches, IsNumber, IsOptional, IsNumberString, IsEnum, ValidateNested } from 'class-validator';
-import { CreateDateColumn, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { CreateDateColumn, Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { TypeormJSONTransformer, TypeormValidableEntity } from '@ts-core/backend';
 import { CoinFactory, Coin as HlfCoin } from '@project/common/hlf/coin';
 import { Coin, CoinStatus } from '@project/common/platform/coin';
@@ -11,6 +11,7 @@ import { ICoinData } from '@project/common/hlf/coin/data';
 import { TRANSFORM_SINGLE } from '@project/module/core';
 import { ICoinPermission } from '@project/common/hlf/coin/permission';
 import * as _ from 'lodash';
+import { CompanyEntity } from '../company';
 
 @Entity({ name: 'coin' })
 export class CoinEntity extends TypeormValidableEntity implements Coin {
@@ -41,6 +42,11 @@ export class CoinEntity extends TypeormValidableEntity implements Coin {
     @IsEnum(CoinStatus)
     public status: CoinStatus;
 
+    @Column({ name: 'company_id' })
+    @IsOptional()
+    @IsNumber()
+    public companyId: number;
+
     @Expose({ groups: TRANSFORM_SINGLE })
     @Column({ type: 'json', transformer: TypeormJSONTransformer.instance })
     @IsOptional()
@@ -65,6 +71,14 @@ export class CoinEntity extends TypeormValidableEntity implements Coin {
 
     @CreateDateColumn()
     public created: Date;
+
+
+    @Exclude()
+    @ManyToOne(() => CompanyEntity, company => company.users, { cascade: true })
+    @IsOptional()
+    @ValidateNested()
+    @JoinColumn({ name: 'company_id' })
+    public company?: CompanyEntity;
 
     @Exclude()
     @OneToMany(() => CoinBalanceEntity, item => item.coin)

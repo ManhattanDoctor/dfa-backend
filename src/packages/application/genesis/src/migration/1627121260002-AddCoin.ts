@@ -15,6 +15,9 @@ export class AddCoin1627121260002 implements MigrationInterface {
                     constraint "coin_id_pkey" primary key,
                 "status" varchar not null,
 
+                "company_id" integer not null
+                    constraint "coin_company_id_fkey" references "company",
+
                 "hlf_uid" varchar
                     constraint "coin_hlf_uid_pkey" unique,
 

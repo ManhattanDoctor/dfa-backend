@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { DefaultController } from '@ts-core/backend-nestjs';
 import { TypeormUtil } from '@ts-core/backend';
@@ -10,7 +10,9 @@ import { ICoinListDto, ICoinListDtoResponse } from '@project/common/platform/api
 import { Coin } from '@project/common/platform/coin';
 import { COIN_URL } from '@project/common/platform/api';
 import { CoinEntity } from '@project/module/database/coin';
+import { IOpenIdBearer, OpenIdBearer, OpenIdGuard, OpenIdResourcePermission } from '@project/module/openid';
 import * as _ from 'lodash';
+import { ResourcePermission } from '@project/common/platform';
 
 // --------------------------------------------------------------------------
 //
@@ -20,38 +22,21 @@ import * as _ from 'lodash';
 
 export class CoinListDto implements ICoinListDto {
     @ApiPropertyOptional()
-    conditions?: FilterableConditions<Coin>;
+    public conditions?: FilterableConditions<Coin>;
 
     @ApiPropertyOptional()
-    sort?: FilterableSort<Coin>;
+    public sort?: FilterableSort<Coin>;
 
     @ApiProperty({ default: Paginable.DEFAULT_PAGE_SIZE })
-    pageSize: number;
+    public pageSize: number;
 
     @ApiProperty({ default: Paginable.DEFAULT_PAGE_INDEX })
-    pageIndex: number;
+    public pageIndex: number;
 
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    traceId?: string;
-}
-
-export class CoinListDtoResponse implements ICoinListDtoResponse {
-    @ApiProperty()
-    pageSize: number;
-
-    @ApiProperty()
-    pageIndex: number;
-
-    @ApiProperty()
-    pages: number;
-
-    @ApiProperty()
-    total: number;
-
-    @ApiProperty({ isArray: true, type: Coin })
-    items: Array<Coin>;
+    public traceId?: string;
 }
 
 // --------------------------------------------------------------------------
@@ -78,11 +63,16 @@ export class CoinListController extends DefaultController<ICoinListDto, ICoinLis
     //
     // --------------------------------------------------------------------------
 
-    @Swagger({ name: 'Get coin list', response: CoinListDtoResponse })
+    @Swagger({ name: 'Get coin list', response: null })
     @Get()
-    public async executeExtended(@Query({ transform: Paginable.transform }) params: CoinListDto): Promise<ICoinListDtoResponse> {
+    @OpenIdResourcePermission(ResourcePermission.COIN_LIST)
+    @UseGuards(OpenIdGuard)
+    public async executeExtended(@Query({ transform: Paginable.transform }) params: CoinListDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<ICoinListDtoResponse> {
         let query = CoinEntity.createQueryBuilder('coin');
-        this.database.addCoinRelations(query);
+        if (!_.isNil(bearer.token.content.company)) {
+            query.where('coin.companyId  = :companyId', { companyId: bearer.token.content.company.id });
+        }
+        this.database.coinRelationsAdd(query);
         return TypeormUtil.toPagination(query, params, this.transform);
     }
 

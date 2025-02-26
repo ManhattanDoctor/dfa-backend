@@ -35,9 +35,13 @@ export class AddObjects1627121260000 implements MigrationInterface {
             return;
         }
 
+        let company = await runner.connection.getRepository(CompanyEntity).findOneByOrFail({ hlfUid: Variables.seed.user.uid });
+
         let coin = new CoinEntity();
         coin.status = CoinStatus.ACTIVE;
         coin.hlfUid = Variables.seed.coin.uid;
+        coin.companyId = company.id;
+        
         coin.balance = CoinBalance.create();
         coin.balance.emit(Variables.seed.coin.amount);
         await repository.save(coin);

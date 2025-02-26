@@ -104,23 +104,24 @@ export class DatabaseService extends LoggerWrapper {
             query.where('coin.hlfUid  = :hlfUid', { hlfUid: idOrHlfUid });
         }
         if (isNeedRelations) {
-            this.addCoinRelations(query);
+            this.coinRelationsAdd(query);
         }
         return query.getOne();
     }
 
-    public async coinBalanceGet(objectUid: string, coinUid: string): Promise<CoinBalanceEntity> {
+    public async coinBalanceGet(id: number, isNeedRelations: boolean): Promise<CoinBalanceEntity> {
         let query = CoinBalanceEntity.createQueryBuilder('coinBalance');
-        query.where('coinBalance.objectUid = :objectUid', { objectUid });
-        query.andWhere('coinBalance.coinUid = :coinUid', { coinUid });
-        this.addCoinBalanceRelations(query);
-        this.addCoinRelations(query);
+        query.where('coinBalance.id = :id', { id });
+        if (isNeedRelations) {
+            this.coinBalanceRelationsAdd(query);
+        }
         return query.getOne();
     }
 
-    public addCoinRelations<T = any>(query: SelectQueryBuilder<T>): void { }
+    public coinRelationsAdd<T = any>(query: SelectQueryBuilder<T>): void { }
 
-    public addCoinBalanceRelations<T = any>(query: SelectQueryBuilder<T>): void {
+    public coinBalanceRelationsAdd<T = any>(query: SelectQueryBuilder<T>): void {
         // query.leftJoinAndSelect('coinBalance.coin', 'coin');
+        // this.addCoinRelations(query);
     }
 }
