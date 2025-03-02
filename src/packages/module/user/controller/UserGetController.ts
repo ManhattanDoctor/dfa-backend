@@ -7,7 +7,6 @@ import { Swagger } from '@project/module/swagger';
 import { DatabaseService } from '@project/module/database/service';
 import { IUserGetDtoResponse } from '@project/common/platform/api/user';
 import { OpenIdGuard, OpenIdResourcePermission } from '@project/module/openid';
-import { OpenIdService } from '@ts-core/openid-common';
 import { UserNotFoundError } from '@project/common/platform';
 import { ResourcePermission } from '@project/common/platform';
 import { TRANSFORM_SINGLE } from '@project/module/core';

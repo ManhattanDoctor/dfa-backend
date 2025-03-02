@@ -82,7 +82,7 @@ export class UserPreferencesEntity extends TypeormValidableEntity implements Use
     public language?: UserPreferencesLanguage;
 
     @Exclude()
-    @OneToOne(() => UserEntity, user => user.preferences, { onDelete: 'CASCADE' })
+    @OneToOne(() => UserEntity, user => user.preferences)
     @JoinColumn({ name: 'user_id' })
     public user: UserEntity;
 }

@@ -7,7 +7,7 @@ import { OpenIdGetUserInfo, OpenIdOfflineValidation } from '@ts-core/backend-nes
 import { Logger } from '@ts-core/common';
 import { IsNotEmpty } from 'class-validator';
 import { INIT_URL } from '@project/common/platform/api';
-import { OpenIdBearer, OpenIdGuard, IOpenIdBearer } from '@project/module/openid';
+import { OpenIdBearer, OpenIdGuard, IOpenIdBearer, OpenIdNeedResources } from '@project/module/openid';
 import { Company } from '@project/common/platform/company';
 import { TRANSFORM_SINGLE } from '@project/module/core';
 import * as _ from 'lodash'
@@ -52,6 +52,7 @@ export class InitController extends DefaultController<void, IInitDtoResponse> {
     // --------------------------------------------------------------------------
 
     @Get()
+    @OpenIdNeedResources()
     @OpenIdGetUserInfo()
     @OpenIdOfflineValidation()
     @UseGuards(OpenIdGuard)

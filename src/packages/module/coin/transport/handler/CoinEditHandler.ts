@@ -32,7 +32,7 @@ export class CoinEditHandler extends TransportCommandAsyncHandler<ICoinEditDto, 
         if (_.isNil(id)) {
             throw new CoinUndefinedError();
         }
-        let item = await this.database.coinGet(id, true);
+        let item = await this.database.coinGet(id);
         if (_.isNil(item)) {
             throw new CoinNotFoundError(id);
         }
@@ -53,7 +53,6 @@ export class CoinEditHandler extends TransportCommandAsyncHandler<ICoinEditDto, 
             item.permissions = params.permissions;
         }
 
-        console.log(item);
         await item.save();
 
         let coin = item.toObject({ groups: TRANSFORM_SINGLE });

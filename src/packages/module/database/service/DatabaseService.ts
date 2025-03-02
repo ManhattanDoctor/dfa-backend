@@ -82,7 +82,12 @@ export class DatabaseService extends LoggerWrapper {
     }
 
     public async companyPlatformGet(): Promise<CompanyEntity> {
-        return this.companyGet(Variables.seed.user.uid, true);
+        let uid = Variables.seed.user.uid;
+        let item = await this.companyGet(uid, true);
+        if (_.isNil(item)) {
+            throw new CompanyNotFoundError(uid);
+        }
+        return item;
     }
 
     public companyAddRelations<T = any>(query: SelectQueryBuilder<T>): void {
@@ -95,7 +100,7 @@ export class DatabaseService extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    public async coinGet(idOrHlfUid: string | number, isNeedRelations: boolean): Promise<CoinEntity> {
+    public async coinGet(idOrHlfUid: string | number): Promise<CoinEntity> {
         let query = CoinEntity.createQueryBuilder('coin');
         if (_.isNumber(idOrHlfUid)) {
             query.where('coin.id  = :id', { id: idOrHlfUid });
@@ -103,25 +108,12 @@ export class DatabaseService extends LoggerWrapper {
         else if (_.isString(idOrHlfUid)) {
             query.where('coin.hlfUid  = :hlfUid', { hlfUid: idOrHlfUid });
         }
-        if (isNeedRelations) {
-            this.coinRelationsAdd(query);
-        }
         return query.getOne();
     }
 
-    public async coinBalanceGet(id: number, isNeedRelations: boolean): Promise<CoinBalanceEntity> {
+    public async coinBalanceGet(id: number): Promise<CoinBalanceEntity> {
         let query = CoinBalanceEntity.createQueryBuilder('coinBalance');
         query.where('coinBalance.id = :id', { id });
-        if (isNeedRelations) {
-            this.coinBalanceRelationsAdd(query);
-        }
         return query.getOne();
-    }
-
-    public coinRelationsAdd<T = any>(query: SelectQueryBuilder<T>): void { }
-
-    public coinBalanceRelationsAdd<T = any>(query: SelectQueryBuilder<T>): void {
-        // query.leftJoinAndSelect('coinBalance.coin', 'coin');
-        // this.addCoinRelations(query);
     }
 }

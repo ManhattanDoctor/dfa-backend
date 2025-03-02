@@ -40,7 +40,7 @@ export class CoinGetController extends DefaultController<number, ICoinGetDtoResp
     @OpenIdResourcePermission(ResourcePermission.COIN_READ)
     @UseGuards(OpenIdGuard)
     public async execute(@Param('id', ParseIntPipe) id: number): Promise<ICoinGetDtoResponse> {
-        let item = await this.database.coinGet(id, true);
+        let item = await this.database.coinGet(id);
         if (_.isNil(item)) {
             throw new CoinNotFoundError(id);
         }

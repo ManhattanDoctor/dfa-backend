@@ -48,7 +48,9 @@ export abstract class EventParser<T, U, V> extends LedgerEventParser<T, U, V> {
     }
 
     protected actionAdd(type: ActionType, objectUid: string, details?: Partial<ActionEntity>): void {
-        this.entityAdd(new ActionEntity(type, objectUid, details, this.transaction, this.uid));
+        if (!_.isNil(objectUid)) {
+            this.entityAdd(new ActionEntity(type, objectUid, details, this.transaction, this.uid));
+        }
     }
 
     public destroy(): void {

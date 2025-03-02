@@ -118,13 +118,6 @@ export class CompanyAddController extends DefaultController<ICompanyAddDto, ICom
         item.preferences = CompanyPreferencesEntity.createEntity(params.preferences);
         await item.save();
 
-        /*
-        await this.database.source.transaction(async manager => {
-            await manager.getRepository(CompanyEntity).save(item);
-            await manager.getRepository(UserEntity).update({ companyId: item.id }, { id: bearer.token.id });
-        });
-        */
-
         let company = item.toObject({ groups: TRANSFORM_SINGLE });
         this.socket.dispatch(new CompanyAddedEvent(company), { room: getSocketUserRoom(bearer.token.id) });
         await this.transport.sendListen(new UserEditCommand({ id: bearer.token.id, companyId: company.id }));

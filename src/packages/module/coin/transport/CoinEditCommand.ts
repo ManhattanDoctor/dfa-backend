@@ -3,6 +3,7 @@ import { Coin, CoinStatus } from '@project/common/platform/coin';
 import { ICoinBalance } from '@hlf-core/coin';
 import { ICoinPermission } from '@project/common/hlf/coin/permission';
 import { ICoinData } from '@project/common/hlf/coin/data';
+import { ICoinSeries } from '@project/common/hlf/coin';
 
 export class CoinEditCommand extends TransportCommandAsync<ICoinEditDto, Coin> {
     // --------------------------------------------------------------------------
@@ -39,6 +40,7 @@ export interface ICoinEditDto {
     data?: ICoinData;
     hlfUid?: string;
     status?: CoinStatus;
+    series?: ICoinSeries;
     balance?: ICoinBalance;
     permissions?: Array<ICoinPermission>;
 }

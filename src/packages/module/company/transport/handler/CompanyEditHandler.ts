@@ -31,8 +31,6 @@ export class CompanyEditHandler extends TransportCommandAsyncHandler<ICompanyEdi
         ObjectUtil.copyPartial(from, to, null, ObjectUtil.keys(from).filter(key => _.isUndefined(from[key])));
     }
 
-
-
     // --------------------------------------------------------------------------
     //
     //  Protected Methods

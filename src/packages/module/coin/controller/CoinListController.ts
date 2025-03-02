@@ -69,10 +69,6 @@ export class CoinListController extends DefaultController<ICoinListDto, ICoinLis
     @UseGuards(OpenIdGuard)
     public async executeExtended(@Query({ transform: Paginable.transform }) params: CoinListDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<ICoinListDtoResponse> {
         let query = CoinEntity.createQueryBuilder('coin');
-        if (!_.isNil(bearer.token.content.company)) {
-            query.where('coin.companyId  = :companyId', { companyId: bearer.token.content.company.id });
-        }
-        this.database.coinRelationsAdd(query);
         return TypeormUtil.toPagination(query, params, this.transform);
     }
 

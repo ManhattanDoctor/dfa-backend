@@ -11,6 +11,7 @@ import { Variables } from '@project/common/hlf';
 import { DatabaseService } from '@project/module/database/service';
 import { OpenIdSynchronizeCommand } from '@project/module/openid/transport';
 import { CoinBalanceEditCommand, CoinBalanceSynchronizeCommand, CoinSynchronizeCommand } from '@project/module/coin/transport';
+import { LedgerBlockParseCommand } from '@hlf-explorer/monitor';
 
 
 @Injectable()
@@ -47,6 +48,9 @@ export class InitializeService extends LoggerWrapper {
 
     public async initialize(): Promise<void> {
         await this.hlf.initialize();
+
+        //this.transport.send(new OpenIdSynchronizeCommand('dd9c7f15-46d6-4159-a494-af9d7f84f6b9'));
+        //this.transport.send(new LedgerBlockParseCommand({ number: 7 }));
         /*
        let item = await this.database.companyPlatformGet();
        let command = new UserGetCommand({ uid: item.hlfUid, details: ['cryptoKey'] });
@@ -78,7 +82,6 @@ export class InitializeService extends LoggerWrapper {
         await item.userAttributesSet('renat.gubaev@mail.ru', { company: JSON.stringify({ id: 123, status: 'passed' }), kys: JSON.stringify({ status: 'not_passed' }) });
         */
 
-        // console.log(await api.sendListen(new UserAddCommand({ cryptoKey: Variables.seed.cryptoKey, roles: [UserRole.COIN_MANAGER] })));
         /*
         console.log(await api.sendListen(new CoinAddCommand({
             type: CoinType.FT,

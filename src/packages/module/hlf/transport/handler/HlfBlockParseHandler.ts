@@ -6,7 +6,7 @@ import { LedgerDatabase, LedgerBlockParseHandler, LedgerEventParser, ILedgerBloc
 import { DatabaseService } from '@project/module/database/service';
 import { TransportSocket } from '@ts-core/socket-server';
 import { Event } from '@project/common/hlf/transport';
-import { CoinBurned, CoinEmitted, CoinHolded, CoinTransferred, CoinUnholded, UserAdded } from '../../lib/parser';
+import { CoinBurned, CoinEmitted, CoinHolded, CoinTransferred, CoinUnholded, UserAdded, UserEdited } from '../../lib/parser';
 import * as _ from 'lodash';
 
 @Injectable()
@@ -22,21 +22,13 @@ export class HlfBlockParseHandler extends LedgerBlockParseHandler {
 
 
         this.parserAdd(Event.USER_ADDED, UserAdded);
+        this.parserAdd(Event.USER_EDITED, UserEdited);
 
         this.parserAdd(CoinEvent.COIN_HOLDED, CoinHolded);
         this.parserAdd(CoinEvent.COIN_BURNED, CoinBurned);
         this.parserAdd(CoinEvent.COIN_EMITTED, CoinEmitted);
         this.parserAdd(CoinEvent.COIN_UNHOLDED, CoinUnholded);
         this.parserAdd(CoinEvent.COIN_TRANSFERRED, CoinTransferred);
-
-        /*
-        this.parserAdd(AuctionEvent.AUCTION_ADDED, AuctionAdded);
-        this.parserAdd(AuctionEvent.AUCTION_BIDED, AuctionBided);
-        this.parserAdd(AuctionEvent.AUCTION_FINISHED, AuctionFinished);
-
-        this.parserAdd(AuctionEvent.NICKNAME_ADDED, NicknameAdded);
-        this.parserAdd(AuctionEvent.NICKNAME_TRANSFERRED, NicknameTransferred);
-        */
     }
 
     // --------------------------------------------------------------------------

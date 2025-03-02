@@ -32,7 +32,7 @@ export class CoinBalanceEditHandler extends TransportCommandAsyncHandler<ICoinBa
         if (_.isNil(id)) {
             throw new CoinBalanceUndefinedError();
         }
-        let item = await this.database.coinBalanceGet(id, true);
+        let item = await this.database.coinBalanceGet(id);
         if (_.isNil(item)) {
             throw new CoinBalanceNotFoundError(id);
         }

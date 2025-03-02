@@ -29,7 +29,7 @@
         "@project/module": "file:./src/packages/module",
         "@ts-core/backend-nestjs": "~10.0.6",
         "@ts-core/backend-nestjs-language": "~10.0.2",
-        "@ts-core/backend-nestjs-openid": "~10.1.17",
+        "@ts-core/backend-nestjs-openid": "~10.1.18",
         "@ts-core/crypto-gost": "~3.0.7",
         "@ts-core/crypto-rsa": "~3.0.4",
         "@ts-core/openid-common": "~1.0.27",

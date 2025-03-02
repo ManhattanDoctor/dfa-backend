@@ -4,7 +4,6 @@ import { DefaultController } from '@ts-core/backend-nestjs';
 import { TypeormUtil } from '@ts-core/backend';
 import { Logger, FilterableConditions, FilterableSort, Paginable } from '@ts-core/common';
 import { IsOptional, IsString } from 'class-validator';
-import { DatabaseService } from '@project/module/database/service';
 import { Swagger } from '@project/module/swagger';
 import { ICoinBalanceListDto, ICoinBalanceListDtoResponse } from '@project/common/platform/api/coin';
 import { COIN_BALANCE_URL } from '@project/common/platform/api';
@@ -53,7 +52,7 @@ export class CoinBalanceListController extends DefaultController<ICoinBalanceLis
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private database: DatabaseService) {
+    constructor(logger: Logger) {
         super(logger);
     }
 
@@ -69,7 +68,6 @@ export class CoinBalanceListController extends DefaultController<ICoinBalanceLis
     @UseGuards(OpenIdGuard)
     public async executeExtended(@Query({ transform: Paginable.transform }) params: CoinBalanceListDto): Promise<ICoinBalanceListDtoResponse> {
         let query = CoinBalanceEntity.createQueryBuilder('coinBalance');
-        this.database.coinBalanceRelationsAdd(query);
         return TypeormUtil.toPagination(query, params, this.transform);
     }
 

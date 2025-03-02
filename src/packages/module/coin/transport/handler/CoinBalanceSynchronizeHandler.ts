@@ -3,13 +3,12 @@ import { Logger, Transport, TransportCommandHandler } from '@ts-core/common';
 import { DatabaseService } from '@project/module/database/service';
 import { ICoinBalanceSynchronizeDto, CoinBalanceSynchronizeCommand } from '../CoinBalanceSynchronizeCommand';
 import { TransportSocket } from '@ts-core/socket-server';
-import { CoinBalanceEntity, CoinEntity } from '@project/module/database/coin';
+import { CoinBalanceEntity } from '@project/module/database/coin';
 import { CoinBalanceGetCommand } from '@hlf-core/coin';
-import { CoinBalanceChangedEvent } from '@project/common/platform/transport';
 import { HlfService } from '@project/module/hlf/service';
-import { CoinNotFoundError, getSocketCoinBalanceRoom } from '@project/common/platform';
-import * as _ from 'lodash';
+import { CoinNotFoundError } from '@project/common/platform';
 import { CoinBalanceEditCommand } from '../CoinBalanceEditCommand';
+import * as _ from 'lodash';
 
 @Injectable()
 export class CoinBalanceSynchronizeHandler extends TransportCommandHandler<ICoinBalanceSynchronizeDto, CoinBalanceSynchronizeCommand> {
@@ -40,7 +39,7 @@ export class CoinBalanceSynchronizeHandler extends TransportCommandHandler<ICoin
             .getOne();
 
         if (_.isNil(item)) {
-            let coin = await this.database.coinGet(coinUid, false);
+            let coin = await this.database.coinGet(coinUid);
             if (_.isNil(coin)) {
                 throw new CoinNotFoundError(coinUid);
             }

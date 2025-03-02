@@ -10,7 +10,7 @@ import { USER_URL } from '@project/common/platform/api';
 import { Swagger } from '@project/module/swagger';
 import { DatabaseService } from '@project/module/database/service';
 import { Transform } from 'class-transformer';
-import { OpenIdBearer, IOpenIdBearer, OpenIdGuard } from '@project/module/openid';
+import { OpenIdBearer, IOpenIdBearer, OpenIdGuard, OpenIdNeedResources } from '@project/module/openid';
 import { ParseUtil } from '@project/module/util';
 import { OpenIdService } from '@ts-core/openid-common';
 import { TransportSocket } from '@ts-core/socket-server';
@@ -87,7 +87,7 @@ export class UserEditController extends DefaultController<IUserEditDto, IUserEdi
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private transport: Transport, private socket: TransportSocket, private database: DatabaseService, private openId: OpenIdService) {
+    constructor(logger: Logger, private transport: Transport) {
         super(logger);
     }
 
@@ -100,9 +100,10 @@ export class UserEditController extends DefaultController<IUserEditDto, IUserEdi
     @Swagger({ name: 'User edit', response: User })
     @Put()
     @OpenIdGetUserInfo()
+    @OpenIdNeedResources()
     @UseGuards(OpenIdGuard)
     public async executeExtended(@Body() params: UserEditDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<IUserEditDtoResponse> {
-        UserUtil.isCanEdit(bearer.user, await this.openId.getResources(bearer.token.value), true);
+        UserUtil.isCanEdit(bearer.user, bearer.resources, true);
         return this.transport.sendListen(new UserEditCommand({ id: bearer.user.id, preferences: params.preferences }));
     }
 }

@@ -140,31 +140,6 @@ export class GenesisService extends KeycloakAdministratorTransport {
             this.log(`OpenId user "${login}" updated`);
         }
         return this.getUser(login);
-
-        /*
-        let headers = { 'Content-Type': 'application/json' };
-        item = await this.getUser(login);
-        await this.call(`admin/realms/${this.settings.realm}/users/${item.id}/reset-password`, {
-            data: JSON.stringify({ type: 'password', value: login, temporary: true }),
-            method: 'put',
-            headers
-        });
-
-        this.warn(`User "${login}" password reset, temporary password is "${login}"`);
-        await this.call(`admin/realms/${this.settings.realm}/users/${item.id}`, {
-            data: JSON.stringify({ requiredActions }),
-            method: 'put',
-            headers
-        });
-        this.warn(`User "${login}" required actions "${requiredActions.join(',')}"`);
-
-        await this.call(`admin/realms/${this.settings.realm}/users/${item.id}`, {
-            data: { email: item.email, attributes },
-            method: 'put',
-            headers
-        });
-        this.warn(`User "${login}" attributes company "${attributes}"`);
-        */
     }
 
     // --------------------------------------------------------------------------
@@ -189,7 +164,7 @@ export class GenesisService extends KeycloakAdministratorTransport {
     public async initialize(login: string): Promise<void> {
         let company = await this.companyCheck();
         let key = await this.addKeyIfNeed(company.uid);
-        await this.changeKeyIfNeed(company, key);
+        // await this.changeKeyIfNeed(company, key);
 
         let openId = await this.addOpenIdUserIfNeed(login, company);
         await this.addUserIfNeed(login, openId, company);

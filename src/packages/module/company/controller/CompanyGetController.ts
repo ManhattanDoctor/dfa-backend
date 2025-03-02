@@ -7,7 +7,6 @@ import { Swagger } from '@project/module/swagger';
 import { DatabaseService } from '@project/module/database/service';
 import { ICompanyGetDtoResponse } from '@project/common/platform/api/company';
 import { OpenIdGuard, OpenIdResourcePermission, } from '@project/module/openid';
-import { OpenIdService } from '@ts-core/openid-common';
 import { CompanyNotFoundError } from '@project/common/platform';
 import { ResourcePermission } from '@project/common/platform';
 import { TRANSFORM_SINGLE } from '@project/module/core';
@@ -27,7 +26,7 @@ export class CompanyGetController extends DefaultController<number, ICompanyGetD
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private database: DatabaseService, private openId: OpenIdService) {
+    constructor(logger: Logger, private database: DatabaseService) {
         super(logger);
     }
 

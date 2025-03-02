@@ -16,7 +16,7 @@ export class LoginService extends LoggerWrapper {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private transport: Transport, private openId: OpenIdService, private database: DatabaseService) {
+    constructor(logger: Logger, private transport: Transport, private openId: OpenIdService) {
         super(logger);
     }
 

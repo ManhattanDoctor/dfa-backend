@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Logger, Transport, TransportCommandHandler } from '@ts-core/common';
 import { CoinSynchronizeCommand } from '../CoinSynchronizeCommand';
-import { CoinEntity } from '@project/module/database/coin';
 import { HlfService } from '@project/module/hlf/service';
 import { DatabaseService } from '@project/module/database/service';
 import { CoinNotFoundError } from '@project/common/platform';
-import * as _ from 'lodash';
 import { CoinEditCommand } from '../CoinEditCommand';
 import { CoinGetCommand } from '@project/common/hlf/transport';
+import * as _ from 'lodash';
 
 @Injectable()
 export class CoinSynchronizeHandler extends TransportCommandHandler<string, CoinSynchronizeCommand> {
@@ -33,7 +32,7 @@ export class CoinSynchronizeHandler extends TransportCommandHandler<string, Coin
         if (_.isNil(coin)) {
             throw new CoinNotFoundError(params);
         }
-        let item = await this.database.coinGet(params, false);
+        let item = await this.database.coinGet(params);
         if (_.isNil(item)) {
             throw new CoinNotFoundError(params);
         }

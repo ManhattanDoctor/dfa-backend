@@ -1,9 +1,9 @@
 import { EventParser } from "../EventParser";
 import { ActionType } from "@project/common/platform";
-import { IUserAddedEventDto } from "@project/common/hlf/transport";
+import { IUserEventDto } from "@project/common/hlf/transport";
 import * as _ from 'lodash';
 
-export class UserAdded extends EventParser<IUserAddedEventDto, void, void> {
+export class UserEdited extends EventParser<IUserEventDto, void, void> {
     // --------------------------------------------------------------------------
     //
     //  Protected Methods
@@ -11,10 +11,10 @@ export class UserAdded extends EventParser<IUserAddedEventDto, void, void> {
     // --------------------------------------------------------------------------
 
     protected async execute(): Promise<void> {
-        let { user, initiatorUid } = this.data;
+        let { userUid, initiatorUid } = this.data;
 
-        let details = { userUid: user.uid, initiatorUid };
-        this.actionAdd(ActionType.USER_ADDED, user.uid, details);
-        this.actionAdd(ActionType.USER_ADDED, initiatorUid, details);
+        let details = { userUid, initiatorUid };
+        this.actionAdd(ActionType.USER_EDITED, userUid, details);
+        this.actionAdd(ActionType.USER_EDITED, initiatorUid, details);
     }
 }

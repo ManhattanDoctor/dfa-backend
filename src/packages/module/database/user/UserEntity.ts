@@ -61,7 +61,6 @@ export class UserEntity extends TypeormValidableEntity implements User, IOpenIdU
     @CreateDateColumn()
     public created: Date;
 
-    @Exclude()
     @Column({ name: 'company_id' })
     @IsOptional()
     @IsNumber()

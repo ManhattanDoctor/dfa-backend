@@ -85,9 +85,6 @@ export class UserListController extends DefaultController<IUserListDto, IUserLis
     @UseGuards(OpenIdGuard)
     public async executeExtended(@Query({ transform: Paginable.transform }) params: UserListDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<IUserListDtoResponse> {
         let query = UserEntity.createQueryBuilder('user');
-        if (!_.isNil(bearer.token.content.company)) {
-            query.where('user.companyId  = :companyId', { companyId: bearer.token.content.company.id });
-        }
         this.database.userRelationsAdd(query);
         return TypeormUtil.toPagination(query, params, this.transform);
     }

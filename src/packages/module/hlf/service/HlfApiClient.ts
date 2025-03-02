@@ -1,10 +1,11 @@
 import { LedgerApiClient } from '@hlf-explorer/common';
 import { ITransportFabricCommandOptions } from '@hlf-core/transport-common';
 import { HlfTransportCommand } from '@hlf-core/common';
-import { ITransportCommand, TransportCommandAsync, ILogger, ClassType, ExtendedError, Transport, TransportCryptoManager, ObjectUtil, ISignature } from '@ts-core/common';
+import { ITransportCommand, TransportCommandAsync, ILogger, ClassType, ExtendedError, Transport, TransportCryptoManager, ObjectUtil, ISignature, TransportCryptoManagerEd25519 } from '@ts-core/common';
 import { IHlfSettings } from '@project/common/platform/settings';
 import { KeyGetByOwnerCommand, KeySignCommand } from '@project/module/custody/transport';
 import * as _ from 'lodash';
+import { Variables } from '@project/common/hlf';
 
 export class HlfApiClient extends LedgerApiClient {
     // --------------------------------------------------------------------------
@@ -35,9 +36,13 @@ export class HlfApiClient extends LedgerApiClient {
         if (_.isNil(this.signer) || command.isReadonly) {
             return;
         }
+        options.userId = Variables.seed.user.uid;
+        options.signature = await TransportCryptoManager.sign(command, new TransportCryptoManagerEd25519(), { publicKey: Variables.seed.cryptoKey.value, privateKey: 'e87501bc00a3db3ba436f7109198e0cb65c5f929eabcedbbb5a9874abc2c73a3e365007e85508c6b44d5101a1d59d0061a48fd1bcd393186ccb5e7ae938a59a8' });
+        /*
         let nonce = Date.now().toString();
         options.userId = this.signer.hlfUid;
         options.signature = await this.transport.sendListen(new KeySignCommand({ uid: await this.getKeyUid(this.signer.uid), message: TransportCryptoManager.toSign(command, nonce), nonce }));
+        */
     }
 
     protected async getKeyUid(owner: string): Promise<string> {

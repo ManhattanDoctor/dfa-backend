@@ -1,18 +1,17 @@
 import { Controller, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
 import { DefaultController } from '@ts-core/backend';
 import { Logger, Transport } from '@ts-core/common';
-import { ICompanyEditDtoResponse } from '@project/common/platform/api/company';
-import { Company, CompanyStatus, CompanyUtil } from '@project/common/platform/company';
-import { COMPANY_URL } from '@project/common/platform/api';
+import { ICoinEditDtoResponse } from '@project/common/platform/api/coin';
+import { Coin, CoinStatus, CoinUtil } from '@project/common/platform/coin';
+import { COIN_URL } from '@project/common/platform/api';
 import { Swagger } from '@project/module/swagger';
 import { IOpenIdBearer, OpenIdBearer, OpenIdGuard, OpenIdNeedResources } from '@project/module/openid';
-import { CompanyEditCommand } from '../transport';
+import { CoinEditCommand } from '../transport';
 import { DatabaseService } from '@project/module/database/service';
-import { CompanyNotFoundError } from '@project/common/platform';
 import * as _ from 'lodash';
 
-@Controller(`${COMPANY_URL}/:id/reject`)
-export class CompanyRejectController extends DefaultController<number, Company> {
+@Controller(`${COIN_URL}/:id/reject`)
+export class CoinRejectController extends DefaultController<number, Coin> {
     // --------------------------------------------------------------------------
     //
     //  Constructor
@@ -29,16 +28,13 @@ export class CompanyRejectController extends DefaultController<number, Company> 
     //
     // --------------------------------------------------------------------------
 
-    @Swagger({ name: 'Company reject', response: Company })
+    @Swagger({ name: 'Coin reject', response: Coin })
     @Post()
     @OpenIdNeedResources()
     @UseGuards(OpenIdGuard)
-    public async executeExtended(@Param('id', ParseIntPipe) id: number, @OpenIdBearer() bearer: IOpenIdBearer): Promise<ICompanyEditDtoResponse> {
-        let item = await this.database.companyGet(id, false);
-        if (_.isNil(item)) {
-            throw new CompanyNotFoundError(id);
-        }
-        CompanyUtil.isCanReject(item, bearer.resources, true);
-        return this.transport.sendListen(new CompanyEditCommand({ id, status: CompanyStatus.REJECTED }));
+    public async executeExtended(@Param('id', ParseIntPipe) id: number, @OpenIdBearer() bearer: IOpenIdBearer): Promise<ICoinEditDtoResponse> {
+        let item = await this.database.coinGet(id);
+        CoinUtil.isCanReject(item, bearer.resources, true);
+        return this.transport.sendListen(new CoinEditCommand({ id, status: CoinStatus.REJECTED }));
     }
 }

@@ -8,8 +8,8 @@ import { CoinBalance } from '@project/common/platform/coin';
 import { CoinBalanceNotFoundError, ResourcePermission } from '@project/common/platform';
 import { OpenIdGuard, OpenIdResourcePermission } from '@project/module/openid';
 import { ICoinBalanceGetDto } from '@hlf-core/coin';
-import * as _ from 'lodash';
 import { TRANSFORM_SINGLE } from '@project/module/core';
+import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
 //
@@ -40,7 +40,7 @@ export class CoinBalanceGetController extends DefaultController<number, ICoinBal
     @OpenIdResourcePermission(ResourcePermission.COIN_BALANCE_READ)
     @UseGuards(OpenIdGuard)
     public async execute(@Param('id', ParseIntPipe) id: number): Promise<ICoinBalanceGetDto> {
-        let item = await this.database.coinBalanceGet(id, true);
+        let item = await this.database.coinBalanceGet(id);
         if (_.isNil(item)) {
             throw new CoinBalanceNotFoundError(id);
         }

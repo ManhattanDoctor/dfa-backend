@@ -1,6 +1,6 @@
 import { IKeycloakAdministratorSettings, IOpenIdUser, KeycloakAdministratorTransport, KeycloakTokenManager } from '@ts-core/openid-common';
 import { ILogger } from '@ts-core/common';
-import { IOpenIdAttributes } from '../lib/IOpenIdAttributes';
+import { IOpenIdAttributes } from '../lib';
 import { UserNotFoundError } from '@project/common/platform';
 import * as _ from 'lodash';
 

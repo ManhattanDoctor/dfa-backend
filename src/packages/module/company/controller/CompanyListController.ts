@@ -11,7 +11,7 @@ import { ICompanyListDto, ICompanyListDtoResponse } from '@project/common/platfo
 import { CompanyEntity } from '@project/module/database/company';
 import { COMPANY_URL } from '@project/common/platform/api';
 import { TRANSFORM_LIST } from '@project/module/core';
-import { IOpenIdBearer, OpenIdBearer, OpenIdGuard, OpenIdResourcePermission } from '@project/module/openid';
+import { OpenIdGuard, OpenIdResourcePermission } from '@project/module/openid';
 import { ResourcePermission } from '@project/common/platform';
 import * as _ from 'lodash';
 
