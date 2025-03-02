@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { DefaultController, Cache } from '@ts-core/backend-nestjs';
-import { Logger, ExtendedError, DateUtil } from '@ts-core/common';
+import { Logger, ExtendedError, DateUtil, Sha512 } from '@ts-core/common';
 import { Swagger } from '@project/module/swagger';
 import { getType, ObjectType } from '@project/common/hlf';
 import { ENTITY_URL } from '@project/common/platform/api';
