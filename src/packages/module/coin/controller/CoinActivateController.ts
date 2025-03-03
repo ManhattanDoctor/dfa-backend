@@ -23,7 +23,7 @@ export class CoinActivateController extends DefaultController<void, Coin> {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: Logger, private transport: Transport, private database: DatabaseService, private openId: OpenIdService, private hlf: HlfService) {
+    constructor(logger: Logger, private transport: Transport, private database: DatabaseService, private hlf: HlfService) {
         super(logger);
     }
 

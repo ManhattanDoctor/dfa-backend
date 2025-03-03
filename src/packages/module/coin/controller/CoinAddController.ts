@@ -3,7 +3,7 @@ import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { DefaultController } from '@ts-core/backend';
 import { Logger, TraceUtil } from '@ts-core/common';
 import { Transform, Type } from 'class-transformer';
-import { IsOptional, IsString, Length, IsEnum, Matches, IsJSON } from 'class-validator';
+import { IsOptional, IsString, Length, IsEnum, Matches, IsJSON, IsInt } from 'class-validator';
 import { Swagger } from '@project/module/swagger';
 import { COIN_URL } from '@project/common/platform/api';
 import { ICoinAddDto, ICoinAddDtoResponse } from '@project/common/platform/api/coin';
@@ -20,8 +20,8 @@ import { ICoinData } from '@project/common/hlf/coin/data';
 import { ICoinPermission } from '@project/common/hlf/coin/permission';
 import { OpenIdGetUserInfo } from '@ts-core/backend-nestjs-openid';
 import { CompanyUtil } from '@project/common/platform/company';
-import * as _ from 'lodash';
 import { ImageUtil } from '@project/common/platform/util';
+import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
 //
@@ -43,6 +43,10 @@ export class CoinAddDto implements ICoinAddDto {
     @Transform(ParseUtil.inputString)
     @Matches(CoinUtil.TICKER_REG_EXP)
     public ticker: string;
+
+    @ApiProperty()
+    @IsInt()
+    public decimals: number;
 
     @ApiPropertyOptional()
     @IsOptional()
@@ -100,6 +104,7 @@ export class CoinAddController extends DefaultController<ICoinAddDto, ICoinAddDt
             series: params.series,
             status: CoinStatus.DRAFT,
             picture: ImageUtil.getCoin(TraceUtil.generate()),
+            decimals: params.decimals,
             permissions: params.permissions,
             companyId: bearer.company.id
         }).save();

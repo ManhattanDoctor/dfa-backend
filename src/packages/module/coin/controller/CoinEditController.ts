@@ -2,7 +2,7 @@ import { Body, Controller, Param, ParseIntPipe, Put, UseGuards } from '@nestjs/c
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { DefaultController } from '@ts-core/backend';
 import { Logger, Transport } from '@ts-core/common';
-import { IsDefined, ValidateNested, IsOptional, Length, IsString, IsEnum, Matches } from 'class-validator';
+import { IsDefined, ValidateNested, IsOptional, Length, IsString, IsEnum, Matches, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ICoinEditDto, ICoinEditDtoResponse } from '@project/common/platform/api/coin';
 import { Coin, COIN_NAME_MAX_LENGTH, COIN_NAME_MIN_LENGTH } from '@project/common/platform/coin';
@@ -56,6 +56,11 @@ export class CoinEditDto implements ICoinEditDto {
 
     @ApiPropertyOptional()
     @IsOptional()
+    @IsInt()
+    public decimals?: number;
+
+    @ApiPropertyOptional()
+    @IsOptional()
     @ValidateNested()
     public permissions?: Array<ICoinPermission>;
 
@@ -91,6 +96,15 @@ export class CoinEditController extends DefaultController<ICoinEditDto, ICoinEdi
     public async executeExtended(@Param('id', ParseIntPipe) id: number, @Body() params: CoinEditDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<Coin> {
         let item = await this.database.coinGet(id);
         CoinUtil.isCanEdit(bearer.company, item, bearer.resources, true);
-        return this.transport.sendListen(new CoinEditCommand({ id, data: params.data, permissions: params.permissions, series: params.series }));
+        return this.transport.sendListen(new CoinEditCommand({
+            id,
+            name: params.name,
+            type: params.type,
+            data: params.data,
+            series: params.series,
+            ticker: params.ticker,
+            decimals: params.decimals,
+            permissions: params.permissions,
+        }));
     }
 }

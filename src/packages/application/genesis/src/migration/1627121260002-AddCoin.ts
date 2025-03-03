@@ -22,6 +22,7 @@ export class AddCoin1627121260002 implements MigrationInterface {
                 "ticker" varchar not null,
                 "status" varchar not null,
                 "picture" varchar not null,
+                "decimals" integer not null,
 
                 "hlf_uid" varchar
                     constraint "coin_hlf_uid_pkey" unique,

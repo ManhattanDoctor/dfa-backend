@@ -113,6 +113,10 @@ export class CompanyEditController extends DefaultController<ICompanyEditDto, IC
     @UseGuards(OpenIdGuard)
     public async executeExtended(@Body() params: CompanyEditDto, @OpenIdBearer() bearer: IOpenIdBearer): Promise<Company> {
         CompanyUtil.isCanEdit(bearer.company, bearer.resources, true);
-        return this.transport.sendListen(new CompanyEditCommand({ id: bearer.company.id, details: params.details, preferences: params.preferences }));
+        return this.transport.sendListen(new CompanyEditCommand({
+            id: bearer.company.id,
+            details: params.details,
+            preferences: params.preferences
+        }));
     }
 }

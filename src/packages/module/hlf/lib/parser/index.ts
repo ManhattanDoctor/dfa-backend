@@ -1,3 +1,4 @@
+export * from './CoinAdded';
 export * from './CoinBurned';
 export * from './CoinHolded';
 export * from './CoinEmitted';

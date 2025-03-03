@@ -8,6 +8,7 @@ import { TransportSocket } from '@ts-core/socket-server';
 import { TRANSFORM_SINGLE } from '@project/module/core';
 import { CoinChangedEvent } from '@project/common/platform/transport';
 import * as _ from 'lodash';
+import { ObjectUtil } from '@project/common/platform/util';
 
 @Injectable()
 export class CoinEditHandler extends TransportCommandAsyncHandler<ICoinEditDto, Coin, CoinEditCommand> {
@@ -37,27 +38,28 @@ export class CoinEditHandler extends TransportCommandAsyncHandler<ICoinEditDto, 
             throw new CoinNotFoundError(id);
         }
 
-        if (!_.isNil(params.status)) {
-            item.status = params.status;
+        let isChanged = ObjectUtil.copy(params, item);
+        if (!_.isNil(params.permissions)) {
+            item.permissions = params.permissions;
+            isChanged = true;
         }
-        if (!_.isNil(params.hlfUid)) {
-            item.hlfUid = params.hlfUid;
+        if (!_.isNil(params.series)) {
+            item.series = params.series;
+            isChanged = true;
         }
         if (!_.isNil(params.data)) {
             item.data = params.data;
-        }
-        if (!_.isNil(params.balance)) {
-            item.balance = params.balance;
-        }
-        if (!_.isNil(params.permissions)) {
-            item.permissions = params.permissions;
+            isChanged = true;
         }
 
-        await item.save();
+        if (isChanged) {
+            await item.save();
+        }
 
-        let coin = item.toObject({ groups: TRANSFORM_SINGLE });
-        this.socket.dispatch(new CoinChangedEvent(coin), { room: getSocketCoinRoom(coin.id) });
-
-        return coin;
+        let value = item.toObject({ groups: TRANSFORM_SINGLE });
+        if (isChanged) {
+            this.socket.dispatch(new CoinChangedEvent(value), { room: getSocketCoinRoom(id) });
+        }
+        return value;
     }
 }
