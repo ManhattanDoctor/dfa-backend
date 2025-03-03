@@ -1,6 +1,6 @@
 import { TransformUtil, ObjectUtil } from '@ts-core/common';
 import { Type, ClassTransformOptions, Exclude, Expose, Transform } from 'class-transformer';
-import { Matches, IsNumber, IsOptional, IsNumberString, IsEnum, ValidateNested, MaxLength, Length, IsJSON } from 'class-validator';
+import { Matches, IsNumber, IsOptional, IsInt, IsEnum, ValidateNested, MaxLength, Length, IsJSON } from 'class-validator';
 import { CreateDateColumn, Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { TypeormJSONTransformer, TypeormValidableEntity } from '@ts-core/backend';
 import { CoinSeries, CoinType, Coin as HlfCoin, CoinUtil as HlfCoinUtil, ICoinSeries } from '@project/common/hlf/coin';
@@ -64,6 +64,10 @@ export class CoinEntity extends TypeormValidableEntity implements Coin {
     @Column({ type: 'varchar' })
     @Matches(HlfCoinUtil.TICKER_REG_EXP)
     public ticker: string;
+
+    @Column()
+    @IsInt()
+    public decimals: number;
 
     @Column({ name: 'hlf_uid' })
     @IsOptional()

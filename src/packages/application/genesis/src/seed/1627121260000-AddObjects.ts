@@ -39,7 +39,7 @@ export class AddObjects1627121260000 implements MigrationInterface {
 
         let company = await runner.connection.getRepository(CompanyEntity).findOneByOrFail({ hlfUid: Variables.seed.user.uid });
 
-        let { ticker, type } = CoinUtil.decomposeUid(Variables.seed.coin.uid);
+        let { ticker, type, decimals } = CoinUtil.decomposeUid(Variables.seed.coin.uid);
 
         let coin = new CoinEntity();
         coin.name = "Russian ruble";
@@ -48,6 +48,7 @@ export class AddObjects1627121260000 implements MigrationInterface {
         coin.status = CoinStatus.ACTIVE;
         coin.hlfUid = Variables.seed.coin.uid;
         coin.picture = ImageUtil.getCoin(Variables.seed.coin.uid);
+        coin.decimals = decimals;
         coin.companyId = company.id;
 
         coin.balance = CoinBalance.create();

@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards } from '@nestjs/common';
+import { Controller, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
 import { DefaultController } from '@ts-core/backend';
 import { Logger, ObjectUtil, Transport } from '@ts-core/common';
 import { Swagger } from '@project/module/swagger';
@@ -11,7 +11,7 @@ import { OpenIdService } from '@ts-core/openid-common';
 import { Key, KeyAlgorithm } from '@project/common/custody';
 import { KeyAddCommand, KeyGetByOwnerCommand } from '@project/module/custody/transport';
 import { HlfService } from '@project/module/hlf/service';
-import { UserAddCommand } from '@project/common/hlf/transport';
+import { CoinAddCommand, UserAddCommand } from '@project/common/hlf/transport';
 import { DatabaseService } from '@project/module/database/service';
 import * as _ from 'lodash';
 
@@ -33,18 +33,14 @@ export class CoinActivateController extends DefaultController<void, Coin> {
     //
     // --------------------------------------------------------------------------
 
-    /*
-    private async activate(bearer: IOpenIdBearer): Promise<ICoinEditDto> {
+    private async activate(item: Coin, bearer: IOpenIdBearer): Promise<ICoinEditDto> {
         let { user } = bearer;
-        if (_.isNil(coin.hlfUid)) {
-            let { algorithm, value } = await this.addKeyIfNeed(coin.uid);
-            let { uid } = await this.hlf.sendListen(new UserAddCommand({ initiatorUid: user.uid, cryptoKey: { algorithm, value } }), null, await this.database.coinPlatformGet());
-            coin.hlfUid = uid;
+        if (_.isNil(item.hlfUid)) {
+            let { uid } = await this.hlf.sendListen(new CoinAddCommand({ initiatorUid: user.uid, ticker: item.ticker, decimals: item.decimals, data: item.data, type: item.type, permissions: item.permissions, series: item.series }), null, bearer.company);
+            item.hlfUid = uid;
         }
-        return { id: coin.id, status: CoinStatus.ACTIVE, hlfUid: coin.hlfUid };
+        return { id: item.id, status: CoinStatus.ACTIVE, hlfUid: item.hlfUid };
     }
-    */
-
 
     // --------------------------------------------------------------------------
     //
@@ -57,11 +53,9 @@ export class CoinActivateController extends DefaultController<void, Coin> {
     @OpenIdGetUserInfo()
     @OpenIdNeedResources()
     @UseGuards(OpenIdGuard)
-    public async executeExtended(@OpenIdBearer() bearer: IOpenIdBearer): Promise<Coin> {
-        /*
-        CoinUtil.isCanActivate(bearer.coin, bearer.res, true);
-        return this.transport.sendListen(new CoinEditCommand(await this.activate(bearer)));
-        */
-        return null;
+    public async executeExtended(@Param('id', ParseIntPipe) id: number, @OpenIdBearer() bearer: IOpenIdBearer): Promise<Coin> {
+        let item = await this.database.coinGet(id);
+        CoinUtil.isCanActivate(bearer.company, item, bearer.resources, true);
+        return this.transport.sendListen(new CoinEditCommand(await this.activate(item, bearer)));
     }
 }
